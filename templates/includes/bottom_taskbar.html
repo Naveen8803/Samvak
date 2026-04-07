@@ -3,31 +3,31 @@
 
     <a href="{{ url_for('index') }}"
         class="taskbar-nav-link{% if request.path == url_for('index') %} active{% endif %}">
-        Home
+        <i class="fas fa-home taskbar-icon"></i>
+        <span class="taskbar-label">Home</span>
     </a>
 
     <a href="{{ url_for('sign_to_text') }}"
         class="taskbar-nav-link{% if request.path == url_for('sign_to_text') %} active{% endif %}">
-        Sign to Text
+        <i class="fas fa-hand-paper taskbar-icon"></i>
+        <span class="taskbar-label">Sign</span>
     </a>
 
     <a href="{{ url_for('speech_to_sign') }}"
         class="taskbar-nav-link{% if request.path == url_for('speech_to_sign') %} active{% endif %}">
-        Speech to Sign
-    </a>
-
-    <a href="/history"
-        class="taskbar-nav-link{% if request.path == '/history' or request.path == '/dashboard' %} active{% endif %}">
-        History
+        <i class="fas fa-microphone taskbar-icon"></i>
+        <span class="taskbar-label">Speech</span>
     </a>
 
     <a href="{{ url_for('learn') }}"
         class="taskbar-nav-link{% if request.path == url_for('learn') %} active{% endif %}">
-        Learn
+        <i class="fas fa-book taskbar-icon"></i>
+        <span class="taskbar-label">Learn</span>
     </a>
 
     <a href="{{ url_for('contact') }}"
         class="taskbar-nav-link{% if request.path == url_for('contact') %} active{% endif %}">
-        Contact
+        <i class="fas fa-envelope taskbar-icon"></i>
+        <span class="taskbar-label">Contact</span>
     </a>
 </div>
