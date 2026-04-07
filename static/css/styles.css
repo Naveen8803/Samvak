@@ -4612,3 +4612,244 @@ body.high-contrast button {
     min-height: 270px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — Comprehensive mobile-first overrides
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet (≤768px) ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 1.2rem 1rem 6rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .page-header p {
+    font-size: 0.85rem;
+  }
+
+  .page-header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .hero-new {
+    padding: 1.5rem 1rem;
+    min-height: auto;
+  }
+
+  .hero-heading-new {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+  }
+
+  .hero-subtitle-new {
+    font-size: 0.95rem;
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+  }
+
+  .stat h3 {
+    font-size: 1.3rem;
+  }
+
+  .stat p {
+    font-size: 0.75rem;
+  }
+
+  .hero-features {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .hero-ctas-new {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary-new,
+  .btn-secondary-new {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1.5rem;
+  }
+
+  /* Hide floating decoration cards on mobile */
+  .float-card {
+    display: none;
+  }
+
+  .hero-showcase {
+    max-width: 100%;
+  }
+
+  /* Panels */
+  .panel-new {
+    min-height: 300px;
+    padding: 1rem;
+  }
+
+  /* Translation controls */
+  .translate-controls-new {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 0.8rem;
+  }
+
+  .control-arrow {
+    transform: rotate(90deg);
+    align-self: center;
+  }
+
+  /* Mode toggle */
+  .mode-toggle {
+    align-self: flex-start;
+  }
+}
+
+/* ── Phone (≤480px) ──────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .page-container {
+    padding: 1rem 0.8rem 5.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .hero-new {
+    padding: 1rem 0.8rem;
+  }
+
+  .hero-heading-new {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+    line-height: 1.2;
+  }
+
+  .hero-subtitle-new {
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .hero-badge-new {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .stat h3 {
+    font-size: 1.1rem;
+  }
+
+  .stat p {
+    font-size: 0.7rem;
+  }
+
+  .feature-item {
+    padding: 0.8rem;
+    gap: 0.6rem;
+  }
+
+  .feature-icon {
+    font-size: 1.4rem;
+  }
+
+  .feature-item h4 {
+    font-size: 0.85rem;
+  }
+
+  .feature-item p {
+    font-size: 0.75rem;
+  }
+
+  .showcase-card {
+    padding: 1rem;
+  }
+
+  /* Panel adjustments */
+  .panel-new {
+    min-height: 250px;
+    border-radius: 12px;
+  }
+
+  .panel-header-new {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Bridge cards */
+  .bridge-card {
+    min-height: 280px;
+    border-radius: 14px;
+    padding: 1rem;
+  }
+
+  .bridge-video-wrap {
+    min-height: 200px;
+  }
+
+  /* Auth pages */
+  .auth-card-glass {
+    padding: 2rem 1.5rem;
+    border-radius: 18px;
+    margin: 0 0.5rem;
+  }
+
+  .glass-input {
+    padding: 0.85rem;
+    font-size: 0.95rem;
+  }
+
+  /* Sign cards on learn page */
+  .sign-card-new {
+    padding: 1.2rem;
+    border-radius: 14px;
+  }
+
+  .sign-card-new h3 {
+    font-size: 1.15rem;
+  }
+
+  .button-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .btn-instructions,
+  .btn-practice {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Search */
+  .search-input {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  /* Category chips */
+  .learn-categories {
+    gap: 0.5rem;
+  }
+
+  .category-btn {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.8rem;
+  }
+}
