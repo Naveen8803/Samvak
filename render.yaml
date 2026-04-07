@@ -2,7 +2,7 @@ services:
   - type: web
     name: samvak
     runtime: python
-    plan: starter
+    plan: free
     buildCommand: |
       pip install -r requirements.txt
       pip install gunicorn
@@ -10,8 +10,6 @@ services:
     startCommand: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT app:app --timeout 120
     envVars:
       - key: PYTHON_VERSION
-        value: "3.10.12"
-      - key: FLASK_ENV
-        value: production
+        value: "3.11.7"
       - key: SECRET_KEY
         generateValue: true
