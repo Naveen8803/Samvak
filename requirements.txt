@@ -17,15 +17,16 @@ werkzeug
 # SQLite is built into Python; no extra driver needed
 
 # ── ML / AI ────────────────────────────────────────────────────────────────
+--extra-index-url https://download.pytorch.org/whl/cpu
 numpy<2.0
-tensorflow-cpu>=2.15,<2.17  # LSTM sign model + translation model (CPU-only for deploy)
-torch --index-url https://download.pytorch.org/whl/cpu
-torchvision --index-url https://download.pytorch.org/whl/cpu
-scikit-learn              # optional: evaluation utilities
-scipy                     # optional: signal processing
+tensorflow-cpu>=2.15,<2.17  # CPU-only for server deployment
+torch                     # will pull CPU-only wheel from extra index
+torchvision               # will pull CPU-only wheel from extra index
+scikit-learn
+scipy
 
 # ── Computer vision ────────────────────────────────────────────────────────
-opencv-python
+opencv-python-headless    # headless for server (no GUI needed)
 mediapipe                 # holistic landmark extraction (sign.py)
 Pillow                    # image decode for base64 frame input
 
@@ -36,12 +37,9 @@ pydub                     # audio format conversion (mp3/ogg → wav)
 
 # ── Text-to-speech ─────────────────────────────────────────────────────────
 gTTS                      # Google TTS (text-to-speech fallback)
-pyttsx3                   # offline TTS (optional)
 
 # ── Translation ────────────────────────────────────────────────────────
 deep-translator           # Google Translate wrapper for output language
-# google-generativeai removed — ISL gloss conversion is now fully local
-# using the iSign vocabulary (14,491 phrases)
 
 # ── NLP ────────────────────────────────────────────────────────────────────
 spacy                     # lemmatisation for speech-to-sign tokenisation
@@ -49,10 +47,6 @@ spacy                     # lemmatisation for speech-to-sign tokenisation
 
 # ── Hugging Face ───────────────────────────────────────────────────────────
 huggingface_hub           # model download utilities
-datasets                  # iSign dataset loading (training scripts)
-
-# ── TensorFlow.js export ───────────────────────────────────────────────────
-tensorflowjs              # convert .h5 → tfjs model for browser inference
 
 # ── Misc ───────────────────────────────────────────────────────────────────
 flask-jwt-extended        # JWT tokens (used by auth.js API path)
