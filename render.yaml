@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: samvak
+    runtime: python
+    plan: starter
+    buildCommand: |
+      pip install -r requirements.txt
+      pip install gunicorn
+      python -m spacy download en_core_web_sm
+    startCommand: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT app:app --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.12"
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
