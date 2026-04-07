@@ -1,4 +1,4 @@
-# Samvak — Python dependencies
+# Samvak — Python dependencies (Production / Render deploy)
 # Install with: pip install -r requirements.txt
 
 # ── Web framework ──────────────────────────────────────────────────────────
@@ -13,17 +13,8 @@ eventlet                  # async driver for flask-socketio real-time streaming
 # ── Auth / security ────────────────────────────────────────────────────────
 werkzeug
 
-# ── Database ───────────────────────────────────────────────────────────────
-# SQLite is built into Python; no extra driver needed
-
-# ── ML / AI ────────────────────────────────────────────────────────────────
---extra-index-url https://download.pytorch.org/whl/cpu
+# ── Core ML (lightweight) ─────────────────────────────────────────────────
 numpy<2.0
-tensorflow-cpu>=2.15,<2.17  # CPU-only for server deployment
-torch                     # will pull CPU-only wheel from extra index
-torchvision               # will pull CPU-only wheel from extra index
-scikit-learn
-scipy
 
 # ── Computer vision ────────────────────────────────────────────────────────
 opencv-python-headless    # headless for server (no GUI needed)
@@ -33,7 +24,6 @@ Pillow                    # image decode for base64 frame input
 # ── Speech recognition ─────────────────────────────────────────────────────
 SpeechRecognition         # Google STT wrapper (speech.py)
 pydub                     # audio format conversion (mp3/ogg → wav)
-# ffmpeg must also be installed on the system: apt install ffmpeg
 
 # ── Text-to-speech ─────────────────────────────────────────────────────────
 gTTS                      # Google TTS (text-to-speech fallback)
@@ -43,10 +33,16 @@ deep-translator           # Google Translate wrapper for output language
 
 # ── NLP ────────────────────────────────────────────────────────────────────
 spacy                     # lemmatisation for speech-to-sign tokenisation
-# After install run:  python -m spacy download en_core_web_sm
 
 # ── Hugging Face ───────────────────────────────────────────────────────────
 huggingface_hub           # model download utilities
 
 # ── Misc ───────────────────────────────────────────────────────────────────
 flask-jwt-extended        # JWT tokens (used by auth.js API path)
+
+# ── Heavy ML (optional — install locally for full backend inference) ───────
+# tensorflow-cpu>=2.15    # LSTM sign model (browser TFJS handles this)
+# torch                   # HF image classifier fallback
+# torchvision             # image transforms for torch model
+# scikit-learn            # evaluation utilities
+# scipy                   # signal processing

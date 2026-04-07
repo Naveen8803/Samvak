@@ -226,9 +226,12 @@ def _get_tf():
     if _tf is None:
         with _import_lock:
             if _tf is None:
-                import tensorflow as _tf_module
-
-                _tf = _tf_module
+                try:
+                    import tensorflow as _tf_module
+                    _tf = _tf_module
+                except ImportError:
+                    print("WARN: tensorflow not installed — backend LSTM inference disabled")
+                    return None
     return _tf
 
 
@@ -237,9 +240,12 @@ def _get_torch():
     if _torch is None:
         with _import_lock:
             if _torch is None:
-                import torch as _torch_module
-
-                _torch = _torch_module
+                try:
+                    import torch as _torch_module
+                    _torch = _torch_module
+                except ImportError:
+                    print("WARN: torch not installed — backend HF inference disabled")
+                    return None
     return _torch
 
 
