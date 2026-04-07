@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Server Error - Samvak{% endblock %}
+
+{% block content %}
+<section class="page-view active">
+  <div class="page-container" style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+    <div style="text-align: center; max-width: 680px;">
+      <h1 class="hero-heading-new" style="font-size: clamp(2rem, 5vw, 3rem);">Something Went Wrong</h1>
+      <p style="color: #94a3b8; margin-top: 0.9rem;">An internal error occurred while processing your request.</p>
+      <div style="margin-top: 1.5rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('index') }}" class="btn-primary-new" style="text-decoration: none;">Go Home</a>
+        <a href="{{ url_for('contact') }}" class="btn-secondary-new" style="text-decoration: none;">Contact Support</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}{% endblock %}

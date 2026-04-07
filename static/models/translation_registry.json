@@ -1,0 +1,514 @@
+{
+  "task": "sign_to_text_translation",
+  "model_version": "sign-sequence-classification-v1",
+  "model_type": "sequence_classification",
+  "input_kind": "sequence",
+  "target_field": "translation_text",
+  "feature_schema": "pose_hands_258_v1",
+  "input_feature_size": 258,
+  "max_video_frames": 120,
+  "min_clips_per_text": 3,
+  "min_confidence": 0.45,
+  "created_at": "2026-03-26T23:48:58Z",
+  "backend_model_path": "translation_model.keras",
+  "vocab_path": "static/models/translation_vocab.json",
+  "manifest_path": "model_data/data_manifest.json",
+  "data_roots": [
+    "model_data",
+    "dataset_imports"
+  ],
+  "imported_data_path": "dataset_imports",
+  "production_phrase_set_path": "model_data/translation_phrase_set.json",
+  "phrase_count": 24,
+  "signer_disjoint_split": true,
+  "dataset": {
+    "clips_total": 1027,
+    "texts_total": 24,
+    "split_counts": {
+      "train": 842,
+      "val": 97,
+      "test": 88
+    },
+    "label_counts_top20": {
+      "2": 96,
+      "1": 88,
+      "3": 80,
+      "blank": 78,
+      "dash": 75,
+      "let me tell you about it": 59,
+      "5": 51,
+      "b": 49,
+      "music": 47,
+      "4": 43,
+      "reading is fun": 39,
+      "have a look at the video": 36,
+      "for the teacher": 32,
+      "6": 31,
+      "let s talk": 31,
+      "let me tell you what happened": 28,
+      "7": 26,
+      "a": 24,
+      "new words": 23,
+      "c": 22
+    },
+    "skipped_labels": {},
+    "raw_label_counts_top20": {
+      "2": 96,
+      "1": 88,
+      "3": 80,
+      "blank": 78,
+      "dash": 75,
+      "let me tell you about it": 59,
+      "5": 51,
+      "b": 49,
+      "music": 47,
+      "4": 43,
+      "reading is fun": 39,
+      "have a look at the video": 36,
+      "for the teacher": 32,
+      "6": 31,
+      "let s talk": 31,
+      "let me tell you what happened": 28,
+      "7": 26,
+      "a": 24,
+      "new words": 23,
+      "c": 22
+    },
+    "manifest_filters": {
+      "allowed_license_tags": [],
+      "allowed_source_datasets": [
+        "isign"
+      ],
+      "allowed_capture_sources": []
+    },
+    "available_source_datasets": {
+      "isign": 1027
+    },
+    "preferred_source_dataset": "isign"
+  },
+  "coverage_summary": {
+    "selected_phrase_set": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "a",
+      "b",
+      "blank",
+      "c",
+      "dash",
+      "e",
+      "for the teacher",
+      "have a look at the video",
+      "how shocking",
+      "let me tell you about it",
+      "let me tell you what happened",
+      "let s talk",
+      "music",
+      "new words",
+      "one has been done for you",
+      "reading is fun",
+      "you"
+    ],
+    "selected_phrase_count": 24
+  },
+  "validation": {
+    "accuracy": 0.3299,
+    "top3_accuracy": 0.4742,
+    "avg_confidence": 0.401,
+    "samples": 97,
+    "examples": [
+      {
+        "target": "5",
+        "prediction": "e",
+        "confidence": 0.2959,
+        "top3": [
+          {
+            "label": "e",
+            "confidence": 0.2959
+          },
+          {
+            "label": "reading is fun",
+            "confidence": 0.1556
+          },
+          {
+            "label": "4",
+            "confidence": 0.0612
+          }
+        ]
+      },
+      {
+        "target": "let me tell you about it",
+        "prediction": "let s talk",
+        "confidence": 0.253,
+        "top3": [
+          {
+            "label": "let s talk",
+            "confidence": 0.253
+          },
+          {
+            "label": "dash",
+            "confidence": 0.2415
+          },
+          {
+            "label": "blank",
+            "confidence": 0.2258
+          }
+        ]
+      },
+      {
+        "target": "7",
+        "prediction": "new words",
+        "confidence": 0.5616,
+        "top3": [
+          {
+            "label": "new words",
+            "confidence": 0.5616
+          },
+          {
+            "label": "blank",
+            "confidence": 0.2385
+          },
+          {
+            "label": "6",
+            "confidence": 0.0695
+          }
+        ]
+      },
+      {
+        "target": "dash",
+        "prediction": "dash",
+        "confidence": 0.2161,
+        "top3": [
+          {
+            "label": "dash",
+            "confidence": 0.2161
+          },
+          {
+            "label": "c",
+            "confidence": 0.1372
+          },
+          {
+            "label": "6",
+            "confidence": 0.1327
+          }
+        ]
+      },
+      {
+        "target": "2",
+        "prediction": "4",
+        "confidence": 0.2106,
+        "top3": [
+          {
+            "label": "4",
+            "confidence": 0.2106
+          },
+          {
+            "label": "blank",
+            "confidence": 0.0969
+          },
+          {
+            "label": "3",
+            "confidence": 0.0902
+          }
+        ]
+      },
+      {
+        "target": "4",
+        "prediction": "4",
+        "confidence": 0.1603,
+        "top3": [
+          {
+            "label": "4",
+            "confidence": 0.1603
+          },
+          {
+            "label": "e",
+            "confidence": 0.1357
+          },
+          {
+            "label": "3",
+            "confidence": 0.0728
+          }
+        ]
+      },
+      {
+        "target": "4",
+        "prediction": "a",
+        "confidence": 0.3266,
+        "top3": [
+          {
+            "label": "a",
+            "confidence": 0.3266
+          },
+          {
+            "label": "for the teacher",
+            "confidence": 0.1868
+          },
+          {
+            "label": "you",
+            "confidence": 0.0966
+          }
+        ]
+      },
+      {
+        "target": "1",
+        "prediction": "4",
+        "confidence": 0.1822,
+        "top3": [
+          {
+            "label": "4",
+            "confidence": 0.1822
+          },
+          {
+            "label": "6",
+            "confidence": 0.1326
+          },
+          {
+            "label": "7",
+            "confidence": 0.1099
+          }
+        ]
+      },
+      {
+        "target": "5",
+        "prediction": "one has been done for you",
+        "confidence": 0.5842,
+        "top3": [
+          {
+            "label": "one has been done for you",
+            "confidence": 0.5842
+          },
+          {
+            "label": "for the teacher",
+            "confidence": 0.084
+          },
+          {
+            "label": "e",
+            "confidence": 0.051
+          }
+        ]
+      },
+      {
+        "target": "3",
+        "prediction": "dash",
+        "confidence": 0.166,
+        "top3": [
+          {
+            "label": "dash",
+            "confidence": 0.166
+          },
+          {
+            "label": "4",
+            "confidence": 0.1427
+          },
+          {
+            "label": "blank",
+            "confidence": 0.1224
+          }
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "accuracy": 0.3182,
+    "top3_accuracy": 0.5227,
+    "avg_confidence": 0.3392,
+    "samples": 88,
+    "examples": [
+      {
+        "target": "2",
+        "prediction": "c",
+        "confidence": 0.2509,
+        "top3": [
+          {
+            "label": "c",
+            "confidence": 0.2509
+          },
+          {
+            "label": "for the teacher",
+            "confidence": 0.1778
+          },
+          {
+            "label": "dash",
+            "confidence": 0.1378
+          }
+        ]
+      },
+      {
+        "target": "let s talk",
+        "prediction": "b",
+        "confidence": 0.1578,
+        "top3": [
+          {
+            "label": "b",
+            "confidence": 0.1578
+          },
+          {
+            "label": "7",
+            "confidence": 0.1225
+          },
+          {
+            "label": "a",
+            "confidence": 0.0867
+          }
+        ]
+      },
+      {
+        "target": "4",
+        "prediction": "c",
+        "confidence": 0.2913,
+        "top3": [
+          {
+            "label": "c",
+            "confidence": 0.2913
+          },
+          {
+            "label": "for the teacher",
+            "confidence": 0.1223
+          },
+          {
+            "label": "4",
+            "confidence": 0.0774
+          }
+        ]
+      },
+      {
+        "target": "one has been done for you",
+        "prediction": "one has been done for you",
+        "confidence": 0.3175,
+        "top3": [
+          {
+            "label": "one has been done for you",
+            "confidence": 0.3175
+          },
+          {
+            "label": "reading is fun",
+            "confidence": 0.1577
+          },
+          {
+            "label": "4",
+            "confidence": 0.0775
+          }
+        ]
+      },
+      {
+        "target": "2",
+        "prediction": "for the teacher",
+        "confidence": 0.3022,
+        "top3": [
+          {
+            "label": "for the teacher",
+            "confidence": 0.3022
+          },
+          {
+            "label": "c",
+            "confidence": 0.213
+          },
+          {
+            "label": "a",
+            "confidence": 0.083
+          }
+        ]
+      },
+      {
+        "target": "b",
+        "prediction": "e",
+        "confidence": 0.2475,
+        "top3": [
+          {
+            "label": "e",
+            "confidence": 0.2475
+          },
+          {
+            "label": "one has been done for you",
+            "confidence": 0.2458
+          },
+          {
+            "label": "b",
+            "confidence": 0.1061
+          }
+        ]
+      },
+      {
+        "target": "b",
+        "prediction": "for the teacher",
+        "confidence": 0.2382,
+        "top3": [
+          {
+            "label": "for the teacher",
+            "confidence": 0.2382
+          },
+          {
+            "label": "c",
+            "confidence": 0.2271
+          },
+          {
+            "label": "dash",
+            "confidence": 0.0889
+          }
+        ]
+      },
+      {
+        "target": "3",
+        "prediction": "2",
+        "confidence": 0.2302,
+        "top3": [
+          {
+            "label": "2",
+            "confidence": 0.2302
+          },
+          {
+            "label": "1",
+            "confidence": 0.1658
+          },
+          {
+            "label": "3",
+            "confidence": 0.1551
+          }
+        ]
+      },
+      {
+        "target": "4",
+        "prediction": "2",
+        "confidence": 0.2345,
+        "top3": [
+          {
+            "label": "2",
+            "confidence": 0.2345
+          },
+          {
+            "label": "5",
+            "confidence": 0.1763
+          },
+          {
+            "label": "1",
+            "confidence": 0.146
+          }
+        ]
+      },
+      {
+        "target": "3",
+        "prediction": "2",
+        "confidence": 0.2502,
+        "top3": [
+          {
+            "label": "2",
+            "confidence": 0.2502
+          },
+          {
+            "label": "5",
+            "confidence": 0.1836
+          },
+          {
+            "label": "1",
+            "confidence": 0.1332
+          }
+        ]
+      }
+    ]
+  }
+}

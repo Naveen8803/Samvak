@@ -1,0 +1,33 @@
+<div class="bottom-taskbar">
+    <div class="nav-indicator"></div>
+
+    <a href="{{ url_for('index') }}"
+        class="taskbar-nav-link{% if request.path == url_for('index') %} active{% endif %}">
+        Home
+    </a>
+
+    <a href="{{ url_for('sign_to_text') }}"
+        class="taskbar-nav-link{% if request.path == url_for('sign_to_text') %} active{% endif %}">
+        Sign to Text
+    </a>
+
+    <a href="{{ url_for('speech_to_sign') }}"
+        class="taskbar-nav-link{% if request.path == url_for('speech_to_sign') %} active{% endif %}">
+        Speech to Sign
+    </a>
+
+    <a href="/history"
+        class="taskbar-nav-link{% if request.path == '/history' or request.path == '/dashboard' %} active{% endif %}">
+        History
+    </a>
+
+    <a href="{{ url_for('learn') }}"
+        class="taskbar-nav-link{% if request.path == url_for('learn') %} active{% endif %}">
+        Learn
+    </a>
+
+    <a href="{{ url_for('contact') }}"
+        class="taskbar-nav-link{% if request.path == url_for('contact') %} active{% endif %}">
+        Contact
+    </a>
+</div>

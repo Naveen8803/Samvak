@@ -1,0 +1,713 @@
+{% extends 'base.html' %}
+
+{% block title %}Samvak - Speech to Sign{% endblock %}
+
+{% block head %}
+<script defer src="{{ asset_url('js/speech.js') if asset_url is defined else url_for('static', filename='js/speech.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script defer src="{{ asset_url('js/hand_avatar.js') if asset_url is defined else url_for('static', filename='js/hand_avatar.js') }}"></script>
+<style>
+  :root {
+    --rail-w: 340px;
+  }
+
+  .sts-shell {
+    display: grid;
+    grid-template-columns: var(--rail-w) 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    max-width: 1360px;
+    padding: 2rem 1.5rem 8rem;
+    margin: 0 auto;
+  }
+
+  /* ── Control rail ── */
+  .sts-rail {
+    position: sticky;
+    top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sts-panel {
+    background: rgba(15,23,42,0.72);
+    border: 1px solid rgba(148,163,184,0.12);
+    border-radius: 20px;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+  }
+
+  .sts-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .sts-panel-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .sts-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: rgba(99,102,241,0.14);
+    color: #818cf8;
+    border: 1px solid rgba(99,102,241,0.25);
+  }
+
+  /* ── Selectors ── */
+  .sts-selectors {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sts-select {
+    flex: 1;
+    background: rgba(2,6,23,0.5);
+    border: 1px solid rgba(148,163,184,0.14);
+    border-radius: 12px;
+    padding: 0.6rem 0.8rem;
+    color: #cbd5e1;
+    font-size: 0.82rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .sts-select:focus { border-color: #6366f1; }
+
+  .sts-arrow { color: #475569; font-size: 0.9rem; flex-shrink: 0; }
+
+  /* ── Speed slider ── */
+  .sts-speed-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  .sts-speed-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .sts-speed-slider {
+    flex: 1;
+    accent-color: #6366f1;
+    height: 4px;
+  }
+
+  .sts-speed-val {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #c7d2fe;
+    min-width: 2.5rem;
+    text-align: right;
+  }
+
+  /* ── Waveform ── */
+  .sts-waveform {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 48px;
+    background: rgba(2,6,23,0.35);
+    border-radius: 12px;
+    margin-bottom: 0.8rem;
+  }
+
+  .sts-wave-bar {
+    width: 5px;
+    height: 18px;
+    border-radius: 999px;
+    background: #334155;
+    transition: height 0.3s ease, background 0.3s ease;
+  }
+
+  .sts-wave-bar.active {
+    animation: waveAnim 0.6s ease infinite alternate;
+    background: linear-gradient(180deg, #6366f1, #a78bfa);
+  }
+
+  @keyframes waveAnim {
+    0%   { height: 10px; }
+    100% { height: 32px; }
+  }
+
+  .sts-wave-bar:nth-child(2).active { animation-delay: 0.08s; }
+  .sts-wave-bar:nth-child(3).active { animation-delay: 0.16s; }
+  .sts-wave-bar:nth-child(4).active { animation-delay: 0.24s; }
+  .sts-wave-bar:nth-child(5).active { animation-delay: 0.32s; }
+
+  /* ── Status ── */
+  .sts-status {
+    font-size: 0.78rem;
+    color: #818cf8;
+    text-align: center;
+    margin-bottom: 0.8rem;
+    min-height: 1.3rem;
+  }
+
+  /* ── Buttons ── */
+  .sts-btn-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .sts-btn-start {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.65rem 1.2rem;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.25);
+  }
+
+  .sts-btn-start:hover {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    transform: translateY(-1px);
+  }
+
+  .sts-btn-stop {
+    padding: 0.65rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(239,68,68,0.35);
+    background: rgba(239,68,68,0.08);
+    color: #f87171;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .sts-btn-stop:hover { background: rgba(239,68,68,0.15); }
+  .sts-btn-stop:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Upload toggle ── */
+  .sts-upload-toggle {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0;
+    border: none;
+    background: none;
+    color: #64748b;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .sts-upload-toggle:hover { color: #94a3b8; }
+
+  .sts-upload-area {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .sts-upload-area.open { display: flex; }
+
+  .sts-upload-btn {
+    padding: 0.55rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid rgba(148,163,184,0.15);
+    background: rgba(15,23,42,0.5);
+    color: #94a3b8;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .sts-upload-btn:hover { color: #c7d2fe; border-color: rgba(99,102,241,0.4); }
+
+  /* ── Workspace ── */
+  .sts-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* ── Avatar card ── */
+  .sts-avatar-card {
+    background: rgba(15,23,42,0.72);
+    border: 1px solid rgba(148,163,184,0.12);
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+  }
+
+  .sts-avatar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid rgba(148,163,184,0.06);
+  }
+
+  .sts-avatar-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .sts-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+  }
+
+  .sts-avatar-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sts-icon-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(148,163,184,0.15);
+    background: rgba(15,23,42,0.5);
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.15s;
+  }
+
+  .sts-icon-btn:hover { color: #94a3b8; border-color: rgba(148,163,184,0.28); }
+  .sts-icon-btn.active { color: #818cf8; border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.1); }
+
+  /* The avatar container */
+  #hand-avatar-canvas {
+    display: block;
+    width: 100%;
+    height: 380px;
+    cursor: default;
+    background: #0a0f1e;
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .sts-avatar-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1.25rem;
+    border-top: 1px solid rgba(148,163,184,0.06);
+    gap: 1rem;
+  }
+
+  #sts-gloss-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  .sts-gloss-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.25);
+    color: #c7d2fe;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    animation: chipIn 0.2s ease;
+  }
+
+  @keyframes chipIn {
+    from { opacity:0; transform: scale(0.85); }
+    to   { opacity:1; transform: scale(1); }
+  }
+
+  .sts-replay-btn {
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.18);
+    background: rgba(15,23,42,0.5);
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .sts-replay-btn:hover { color: #c7d2fe; border-color: rgba(99,102,241,0.35); background: rgba(99,102,241,0.08); }
+  .sts-replay-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── Transcript + sign-text panels ── */
+  .sts-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .sts-output-panel {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(148,163,184,0.1);
+    border-radius: 16px;
+    padding: 1.25rem;
+  }
+
+  .sts-output-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+  }
+
+  .sts-output-text {
+    color: #e2e8f0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.6;
+    min-height: 2.5rem;
+  }
+
+  .sts-output-interim {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-style: italic;
+    margin-top: 0.4rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .sts-shell {
+      grid-template-columns: 1fr;
+      padding: 1.5rem 1rem 7rem;
+    }
+    .sts-rail { position: static; }
+    .sts-bottom-grid { grid-template-columns: 1fr; }
+    #hand-avatar-canvas { height: 280px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sts-shell">
+
+  <!-- ── LEFT RAIL: Controls ── -->
+  <aside class="sts-rail">
+
+    <!-- Language selectors -->
+    <div class="sts-panel">
+      <div class="sts-panel-header">
+        <span class="sts-panel-title">Language</span>
+      </div>
+      <div class="sts-selectors">
+        <select id="speechInputLang" class="sts-select" title="Speech input language">
+          <option value="en-IN">English (India)</option>
+          <option value="te-IN">Telugu</option>
+          <option value="hi-IN">Hindi</option>
+          <option value="ta-IN">Tamil</option>
+          <option value="kn-IN">Kannada</option>
+        </select>
+        <span class="sts-arrow">→</span>
+        <select id="signOutputLang" class="sts-select" title="Sign output language">
+          <option value="ISL">ISL (Indian)</option>
+        </select>
+      </div>
+
+      <!-- Speed -->
+      <div class="sts-speed-row">
+        <span class="sts-speed-label">Speed</span>
+        <input type="range" id="speedSlider" class="sts-speed-slider" min="0.4" max="2.0" step="0.1" value="1.0">
+        <span id="speedVal" class="sts-speed-val">1.0×</span>
+      </div>
+    </div>
+
+    <!-- Mic panel -->
+    <div class="sts-panel">
+      <div class="sts-panel-header">
+        <span class="sts-panel-title">Voice Input</span>
+        <span id="source-meta" class="sts-badge">EN</span>
+      </div>
+
+      <div class="sts-waveform" id="waveform-box">
+        <div class="sts-wave-bar" id="wb1"></div>
+        <div class="sts-wave-bar" id="wb2"></div>
+        <div class="sts-wave-bar" id="wb3"></div>
+        <div class="sts-wave-bar" id="wb4"></div>
+        <div class="sts-wave-bar" id="wb5"></div>
+      </div>
+
+      <p id="partial-status" class="sts-status">Ready to listen. Hand motion preview loads on first use.</p>
+
+      <div class="sts-btn-row">
+        <button id="speechBtn" class="sts-btn-start">
+          <i class="fas fa-microphone"></i> Start Mic
+        </button>
+        <button id="stop-live-btn" class="sts-btn-stop" disabled>
+          <i class="fas fa-stop"></i> Stop
+        </button>
+      </div>
+
+      <button class="sts-upload-toggle" id="toggle-upload">
+        <i class="fas fa-paperclip"></i> Or upload audio file
+      </button>
+      <div class="sts-upload-area" id="upload-area">
+        <input type="file" id="audioUpload" accept="audio/*">
+        <button id="uploadBtn" class="sts-upload-btn">
+          <i class="fas fa-file-audio"></i> Transcribe file
+        </button>
+      </div>
+
+      <!-- Text input -->
+      <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid rgba(148,163,184,0.1);">
+        <label for="textTranslateInput" style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.5rem; display:block;">Or type text</label>
+        <div style="display:flex; gap:0.5rem;">
+          <input type="text" id="textTranslateInput" placeholder="Type something to translate..."
+            style="flex:1; background:rgba(2,6,23,0.5); border:1px solid rgba(148,163,184,0.14); border-radius:10px; padding:0.65rem 0.85rem; color:#e2e8f0; font-size:0.82rem; outline:none;"
+            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='rgba(148,163,184,0.14)'" />
+          <button id="textTranslateBtn" class="sts-btn-start" style="min-width:auto; padding:0.65rem 1.1rem; border-radius:10px;">
+            <i class="fas fa-language"></i> Translate
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="sts-panel" style="font-size:0.78rem; color:#64748b; line-height:1.6;">
+      <div class="sts-panel-header">
+        <span class="sts-panel-title">Tips</span>
+      </div>
+      <p>Speak clearly and pause briefly between phrases. The avatar signs each word in ISL order.</p>
+      <p style="margin-top:0.5rem;">Unknown words are fingerspelled letter-by-letter automatically.</p>
+    </div>
+
+  </aside>
+
+  <!-- ── RIGHT WORKSPACE ── -->
+  <div class="sts-workspace">
+
+    <!-- Hands-only avatar card -->
+    <div class="sts-avatar-card">
+      <div class="sts-avatar-header">
+        <span class="sts-avatar-title">
+          <span class="sts-live-dot"></span>
+          ISL Hand Avatar
+        </span>
+        <div class="sts-avatar-controls">
+          <button class="sts-icon-btn" id="themeToggleBtn" title="Toggle avatar theme">
+            <i class="fas fa-circle-half-stroke"></i>
+          </button>
+          <span id="avatar-engine-indicator" style="font-size:0.72rem;color:#64748b;align-self:center;">3D Engine</span>
+        </div>
+      </div>
+
+      <!-- The 3D avatar container -->
+      <div id="hand-avatar-canvas"></div>
+
+      <div class="sts-avatar-footer">
+        <div id="sts-gloss-row"></div>
+        <button id="replay-btn" class="sts-replay-btn" disabled>
+          <i class="fas fa-rotate-right"></i> Replay
+        </button>
+      </div>
+    </div>
+
+    <!-- Transcript + Sign text -->
+    <div class="sts-bottom-grid">
+      <div class="sts-output-panel">
+        <div class="sts-output-label">Live transcript</div>
+        <div id="transcript-text" class="sts-output-text">Your speech will appear here...</div>
+        <div id="interim-text"    class="sts-output-interim"></div>
+      </div>
+      <div class="sts-output-panel">
+        <div class="sts-output-label">ISL sign text</div>
+        <div id="signOutput" class="sts-output-text">Waiting for translation...</div>
+      </div>
+    </div>
+
+  </div><!-- workspace -->
+
+</div><!-- shell -->
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ── Init hands avatar ──────────────────────────────────────────────────
+  const ha = new HandAvatar('hand-avatar-canvas');
+  let lastTokens = [];
+  let avatarTheme = 'auto';
+
+  // Speed slider
+  const speedSlider = document.getElementById('speedSlider');
+  const speedVal    = document.getElementById('speedVal');
+  speedSlider.addEventListener('input', () => {
+    const v = parseFloat(speedSlider.value);
+    speedVal.textContent = v.toFixed(1) + 'x';
+    ha.setSpeed(v);
+  });
+
+  // Theme toggle
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    const cycle = { auto:'light', light:'dark', dark:'auto' };
+    avatarTheme = cycle[avatarTheme] || 'auto';
+    ha.setTheme(avatarTheme);
+    document.getElementById('themeToggleBtn').classList.toggle('active', avatarTheme !== 'auto');
+  });
+
+  // Replay
+  const replayBtn = document.getElementById('replay-btn');
+  replayBtn.addEventListener('click', () => {
+    if (!lastTokens.length) return;
+    replayBtn.disabled = true;
+    ha.play(lastTokens).finally(() => { replayBtn.disabled = false; });
+  });
+
+  // Gloss chips
+  function renderGlossChips(signText) {
+    const row = document.getElementById('sts-gloss-row');
+    row.innerHTML = '';
+    if (!signText) return;
+    signText.split(' ').filter(Boolean).forEach(word => {
+      const chip = document.createElement('span');
+      chip.className = 'sts-gloss-chip';
+      chip.textContent = word;
+      row.appendChild(chip);
+    });
+  }
+
+  // ── Wire into existing speech.js pipeline ─────────────────────────────
+  window.playHandAvatar = async function(tokens, signText) {
+    lastTokens = tokens || [];
+    replayBtn.disabled = !lastTokens.length;
+    renderGlossChips(signText || '');
+
+    // Update sign output panel
+    if (signText) {
+      document.getElementById('signOutput').textContent = signText;
+    }
+
+    if (lastTokens.length) {
+      await ha.play(lastTokens);
+    }
+  };
+
+  // Waveform animation sync
+  function setWaveActive(active) {
+    ['wb1','wb2','wb3','wb4','wb5'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('active', active);
+    });
+  }
+
+  // Observe partial-status changes to sync waveform
+  const statusEl = document.getElementById('partial-status');
+  if (statusEl) {
+    new MutationObserver(() => {
+      const txt = statusEl.textContent || '';
+      setWaveActive(txt.includes('Listening') || txt.includes('Translating'));
+    }).observe(statusEl, { childList:true, characterData:true, subtree:true });
+  }
+
+  // ── Text input translate ──────────────────────────────────────────────
+  const textInput = document.getElementById('textTranslateInput');
+  const textBtn = document.getElementById('textTranslateBtn');
+
+  async function translateText() {
+    const text = (textInput ? textInput.value : '').trim();
+    if (!text) return;
+
+    textBtn.disabled = true;
+    textBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Translating...';
+
+    const transcriptEl = document.getElementById('transcript-text');
+    const signOutputEl = document.getElementById('signOutput');
+    if (transcriptEl) transcriptEl.textContent = text;
+    if (signOutputEl) signOutputEl.textContent = 'Translating...';
+
+    const inputLang = document.getElementById('speechInputLang');
+    const signLang = document.getElementById('signOutputLang');
+
+    try {
+      const res = await fetch('/api/speech-to-sign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: text,
+          input_language: inputLang ? inputLang.value : 'en-IN',
+          sign_language: signLang ? signLang.value : 'ISL',
+          render_mode: '3d_avatar_only',
+          realtime_mode: 'final',
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Translation failed');
+      }
+
+      const data = await res.json();
+      const signText = data.sign_text || data.display_text || data.transcribed_text || '';
+      const tokens = data.sign_tokens || [];
+
+      if (signOutputEl) signOutputEl.textContent = signText || 'No sign text';
+      if (transcriptEl) transcriptEl.textContent = data.transcribed_text || text;
+
+      if (tokens.length && typeof window.playHandAvatar === 'function') {
+        await window.playHandAvatar(tokens, signText);
+      }
+    } catch (err) {
+      console.error(err);
+      if (signOutputEl) signOutputEl.textContent = 'Error: ' + err.message;
+    } finally {
+      textBtn.disabled = false;
+      textBtn.innerHTML = '<i class="fas fa-language"></i> Translate';
+    }
+  }
+
+  if (textBtn) textBtn.addEventListener('click', translateText);
+  if (textInput) textInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') translateText();
+  });
+});
+</script>
+
+{% endblock %}
+{% block footer %}{% endblock %}

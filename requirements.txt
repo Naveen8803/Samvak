@@ -1,0 +1,58 @@
+# Samvak — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Web framework ──────────────────────────────────────────────────────────
+flask
+flask-cors
+flask-login
+flask-sqlalchemy
+flask-socketio
+python-socketio
+eventlet                  # async driver for flask-socketio real-time streaming
+
+# ── Auth / security ────────────────────────────────────────────────────────
+werkzeug
+
+# ── Database ───────────────────────────────────────────────────────────────
+# SQLite is built into Python; no extra driver needed
+
+# ── ML / AI ────────────────────────────────────────────────────────────────
+numpy
+tensorflow                # LSTM sign model + translation model
+torch                     # HF image classifier (ResNet)
+torchvision               # image transforms for torch model
+scikit-learn              # optional: evaluation utilities
+scipy                     # optional: signal processing
+
+# ── Computer vision ────────────────────────────────────────────────────────
+opencv-python
+mediapipe                 # holistic landmark extraction (sign.py)
+Pillow                    # image decode for base64 frame input
+
+# ── Speech recognition ─────────────────────────────────────────────────────
+SpeechRecognition         # Google STT wrapper (speech.py)
+pydub                     # audio format conversion (mp3/ogg → wav)
+# ffmpeg must also be installed on the system: apt install ffmpeg
+
+# ── Text-to-speech ─────────────────────────────────────────────────────────
+gTTS                      # Google TTS (text-to-speech fallback)
+pyttsx3                   # offline TTS (optional)
+
+# ── Translation ────────────────────────────────────────────────────────
+deep-translator           # Google Translate wrapper for output language
+# google-generativeai removed — ISL gloss conversion is now fully local
+# using the iSign vocabulary (14,491 phrases)
+
+# ── NLP ────────────────────────────────────────────────────────────────────
+spacy                     # lemmatisation for speech-to-sign tokenisation
+# After install run:  python -m spacy download en_core_web_sm
+
+# ── Hugging Face ───────────────────────────────────────────────────────────
+huggingface_hub           # model download utilities
+datasets                  # iSign dataset loading (training scripts)
+
+# ── TensorFlow.js export ───────────────────────────────────────────────────
+tensorflowjs              # convert .h5 → tfjs model for browser inference
+
+# ── Misc ───────────────────────────────────────────────────────────────────
+flask-jwt-extended        # JWT tokens (used by auth.js API path)

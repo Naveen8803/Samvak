@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}Dictionary | Samvak{% endblock %}
+{% block content %}
+<div class="dictionary-container">
+    <div class="dictionary-header">
+        <h1>Sign Dictionary</h1>
+        <p>Browse our collection of Indian Sign Language (ISL) gestures.</p>
+
+        <div class="search-bar-container">
+            <input type="text" id="dict-search" placeholder="Search for a word (e.g., Hello, Help)...">
+            <button id="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+    </div>
+
+    <div class="dictionary-grid" id="dictionary-grid">
+        <!-- Words will be injected here via JS -->
+        <div class="loading-spinner">Loading dictionary...</div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="preview-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-modal">&times;</button>
+        <h2 id="modal-word-title">Word Title</h2>
+        <div class="image-sequence-container">
+            <img id="sequence-display" src="" alt="Sign Language Gesture">
+            <video id="video-display" controls style="display:none; width:100%; border-radius: 14px;" loop playsinline></video>
+            <div class="controls">
+                <button id="play-btn"><i class="fas fa-play"></i> Play</button>
+                <div class="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dictionary-container {
+        padding: 80px 20px 100px;
+        /* Space for navbar */
+        max-width: 1200px;
+        margin: 0 auto;
+        min-height: 100vh;
+    }
+
+    .dictionary-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .dictionary-header h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+    }
+
+    .search-bar-container {
+        max-width: 500px;
+        margin: 30px auto 0;
+        position: relative;
+    }
+
+    #dict-search {
+        width: 100%;
+        padding: 15px 25px;
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    #dict-search:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .dictionary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 20px;
+    }
+
+    .word-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .word-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05));
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .word-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-primary);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .word-card:hover::before {
+        opacity: 1;
+    }
+
+    .word-card h3 {
+        font-size: 1rem;
+        font-weight: 500;
+        margin: 0;
+        color: #e2e8f0;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 2000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background: #1e1e24;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 90%;
+        width: 500px;
+        position: relative;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 2rem;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .close-modal:hover {
+        color: white;
+    }
+
+    .image-sequence-container {
+        margin-top: 20px;
+        background: black;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        aspect-ratio: 4/3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #sequence-display {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .controls {
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    #play-btn {
+        background: var(--accent-primary);
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    #play-btn:hover {
+        background: var(--accent-hover);
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    #progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--accent-secondary);
+        transition: width 0.1s linear;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const grid = document.getElementById('dictionary-grid');
+        const searchInput = document.getElementById('dict-search');
+        let allWords = [];
+
+        // Fetch Words
+        fetch('/api/dictionary/words')
+            .then(res => res.json())
+            .then(words => {
+                allWords = words || [];
+                renderWords(allWords);
+            })
+            .catch(err => {
+                grid.innerHTML = '<div style="color:red">Failed to load dictionary.</div>';
+                console.error(err);
+            });
+
+        // Render Function
+        function renderWords(wordList) {
+            grid.innerHTML = '';
+            if (wordList.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.5);">No words found.</div>';
+                return;
+            }
+
+            wordList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                const word = typeof item === 'string' ? item : item.word;
+                // Display formatted name (replace _ with space)
+                const displayName = word.replace(/_/g, ' ');
+                card.innerHTML = `<h3>${displayName}</h3>`;
+                card.onclick = () => openModal(word);
+                grid.appendChild(card);
+            });
+        }
+
+        // Search Filter
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allWords.filter(item => {
+                const word = typeof item === 'string' ? item : item.word;
+                return word.toLowerCase().replace(/_/g, ' ').includes(term);
+            });
+            renderWords(filtered);
+        });
+
+        // Modal Logic
+        const modal = document.getElementById('preview-modal');
+        const modalTitle = document.getElementById('modal-word-title');
+        const imgDisplay = document.getElementById('sequence-display');
+        const videoDisplay = document.getElementById('video-display');
+        const closeBtn = document.querySelector('.close-modal');
+        const playBtn = document.getElementById('play-btn');
+        const progressFill = document.getElementById('progress-fill');
+
+        let currentImages = [];
+        let isPlaying = false;
+        let frameIndex = 0;
+        let animationInterval = null;
+        let currentWord = "";
+
+        function openModal(word) {
+            currentWord = word;
+            modalTitle.innerText = word.replace(/_/g, ' ');
+            modal.classList.add('active');
+            imgDisplay.src = ""; // Clear prev
+            imgDisplay.style.display = 'block';
+            videoDisplay.style.display = 'none';
+            videoDisplay.pause();
+            videoDisplay.src = '';
+            playBtn.style.display = 'inline-flex';
+
+            // Load Images
+            fetch(`/api/dictionary/images/${word}`)
+                .then(res => res.json())
+                .then(payload => {
+                    if (payload.type === 'video' && payload.src) {
+                        currentImages = [];
+                        playBtn.style.display = 'none';
+                        imgDisplay.style.display = 'none';
+                        videoDisplay.style.display = 'block';
+                        videoDisplay.src = `/api/dictionary/serve/${currentWord}/${payload.src}`;
+                        videoDisplay.play().catch(() => {});
+                        progressFill.style.width = '0%';
+                        return;
+                    }
+
+                    const files = Array.isArray(payload) ? payload : (payload.files || []);
+                    currentImages = files;
+                    frameIndex = 0;
+
+                    if (currentImages.length > 0) {
+                        showFrame(0);
+                        playSequence();
+                    } else {
+                        alert("No media found for this word.");
+                    }
+                });
+        }
+
+        function showFrame(index) {
+            if (!currentImages.length) return;
+            const filename = currentImages[index];
+            imgDisplay.src = `/api/dictionary/serve/${currentWord}/${filename}`;
+
+            // Update progress
+            const pct = ((index + 1) / currentImages.length) * 100;
+            progressFill.style.width = `${pct}%`;
+        }
+
+        function playSequence() {
+            if (isPlaying) return;
+            isPlaying = true;
+            playBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+
+            animationInterval = setInterval(() => {
+                frameIndex++;
+                if (frameIndex >= currentImages.length) {
+                    frameIndex = 0; // Loop
+                }
+                showFrame(frameIndex);
+            }, 150); // Speed: 150ms per frame
+        }
+
+        function stopSequence() {
+            isPlaying = false;
+            playBtn.innerHTML = '<i class="fas fa-play"></i> Play';
+            clearInterval(animationInterval);
+        }
+
+        playBtn.onclick = () => {
+            if (isPlaying) stopSequence();
+            else playSequence();
+        };
+
+        closeBtn.onclick = () => {
+            modal.classList.remove('active');
+            stopSequence();
+            videoDisplay.pause();
+            videoDisplay.src = '';
+        };
+
+        // Close on click outside
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                stopSequence();
+                videoDisplay.pause();
+                videoDisplay.src = '';
+            }
+        };
+    });
+</script>
+{% endblock %}

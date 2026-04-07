@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Settings - Samvak{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <header class="page-header">
+        <div>
+            <h1>Account Settings</h1>
+            <p>Manage your profile information and preferences.</p>
+        </div>
+    </header>
+
+    <div class="panel-new" style="max-width: 600px; margin: 0 auto;">
+        <div class="panel-header-new">
+            <h2>Profile Details</h2>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages" style="margin-bottom: 1rem;">
+            {% for category, message in messages %}
+            {% if category == 'success' %}
+            <div class="status-badge"
+                style="width: 100%; justify-content: center; background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.5);">
+                {{ message }}
+            </div>
+            {% else %}
+            <div class="status-badge"
+                style="width: 100%; justify-content: center; background: rgba(239, 68, 68, 0.2); color: #fca5a5; border-color: rgba(239, 68, 68, 0.5);">
+                {{ message }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('auth.update_settings') }}" method="POST"
+            style="display: flex; flex-direction: column; gap: 1.75rem;">
+            <section style="display: grid; gap: 1.1rem;">
+                <div>
+                    <h3 style="margin: 0; color: #f8fafc; font-size: 1.05rem;">Profile Details</h3>
+                    <p style="margin: 0.35rem 0 0 0; color: #94a3b8; font-size: 0.9rem;">
+                        Update the account information used for sign and speech history.
+                    </p>
+                </div>
+
+                <div class="control-group">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username" class="lang-selector"
+                        value="{{ current_user.username }}" style="width: 100%; padding: 0.8rem;">
+                </div>
+
+                <div class="control-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" name="email" id="email" class="lang-selector" value="{{ current_user.email }}"
+                        style="width: 100%; padding: 0.8rem;">
+                </div>
+
+                <div class="control-group">
+                    <label for="password">New Password (leave blank to keep current)</label>
+                    <input type="password" name="password" id="password" class="lang-selector" placeholder="********"
+                        style="width: 100%; padding: 0.8rem;">
+                </div>
+            </section>
+
+            <section
+                style="display: grid; gap: 1.1rem; padding-top: 1.4rem; border-top: 1px solid rgba(255,255,255,0.08);">
+                <div>
+                    <h3 style="margin: 0; color: #f8fafc; font-size: 1.05rem;">Translation Preferences</h3>
+                    <p style="margin: 0.35rem 0 0 0; color: #94a3b8; font-size: 0.9rem;">
+                        These defaults are applied automatically when you open the live sign and speech translator pages.
+                    </p>
+                </div>
+
+                <div class="control-group">
+                    <label for="sign_output_language">Sign-to-Text Output Language</label>
+                    <select name="sign_output_language" id="sign_output_language" class="lang-selector"
+                        style="width: 100%; padding: 0.8rem;">
+                        {% for value, label in preference_options["sign_output_language"] %}
+                        <option value="{{ value }}" {% if preferences["sign_output_language"] == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="sign_detection_mode">Sign Detection Mode</label>
+                    <select name="sign_detection_mode" id="sign_detection_mode" class="lang-selector"
+                        style="width: 100%; padding: 0.8rem;">
+                        {% for value, label in preference_options["sign_detection_mode"] %}
+                        <option value="{{ value }}" {% if preferences["sign_detection_mode"] == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="speech_input_language">Speech-to-Sign Input Language</label>
+                    <select name="speech_input_language" id="speech_input_language" class="lang-selector"
+                        style="width: 100%; padding: 0.8rem;">
+                        {% for value, label in preference_options["speech_input_language"] %}
+                        <option value="{{ value }}" {% if preferences["speech_input_language"] == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="speech_sign_language">Speech-to-Sign Output Sign Language</label>
+                    <select name="speech_sign_language" id="speech_sign_language" class="lang-selector"
+                        style="width: 100%; padding: 0.8rem;">
+                        {% for value, label in preference_options["speech_sign_language"] %}
+                        <option value="{{ value }}" {% if preferences["speech_sign_language"] == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </section>
+
+            <button type="submit" class="btn-primary-new" style="justify-content: center; margin-top: 0.5rem;">
+                Save Changes
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

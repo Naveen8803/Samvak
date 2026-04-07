@@ -1,0 +1,66 @@
+# Environment & secrets
+.env
+translation_data.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Model files (too large for GitHub)
+*.h5
+*.keras
+*.weights.h5
+*.tflite
+sign_language.h5
+best_sign_language.keras
+best_translation_model.keras
+best_translation_model.ctc.weights.h5
+translation_model.keras
+
+# Database
+*.db
+
+# Datasets & external data
+_external/
+dataset_imports/
+model_data/
+output/
+
+# Temp & staging directories
+_tmp_*/
+tmp/
+_zip_*/
+backup_*/
+translation_export_install_stage/
+artifacts/
+logs/
+
+# Logs & debug output
+*.log
+debug_output.txt
+preprocess_log.txt
+test_deps_log.txt
+
+# Exported archives
+*.zip
+
+# Audio temp files
+temp_converted.wav
+
+# IDE & tools
+.vscode/
+.idea/
+.playwright-cli/
+.gemini/
+.agents/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Node
+node_modules/
+
+# Tensorflow directory
+Tensorflow/

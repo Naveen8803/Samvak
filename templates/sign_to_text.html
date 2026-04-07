@@ -1,0 +1,1179 @@
+{% extends 'base.html' %}
+
+{% block title %}Samvak - Sign to Text{% endblock %}
+{% block head %}
+<!-- Mediapipe Dependencies -->
+<script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script defer src="{{ asset_url('js/tfjs_self_test.js') if asset_url is defined else url_for('static', filename='js/tfjs_self_test.js') }}"></script>
+<script defer src="{{ asset_url('js/sign.js') if asset_url is defined else url_for('static', filename='js/sign.js') }}"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  .sign-hero-shell {
+    min-height: calc(100vh - 100px);
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .sign-flow-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin: -1rem 0 2rem 0;
+  }
+
+  .sign-flow-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.78rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(15, 23, 42, 0.52);
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .sign-flow-chip i {
+    color: #93c5fd;
+  }
+
+  .sign-video-card {
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    box-shadow: 0 22px 60px rgba(2, 6, 23, 0.42);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sign-camera-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(120px, 0.8fr);
+    gap: 0.8rem;
+    padding: 1rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+    background: linear-gradient(180deg, rgba(2, 6, 23, 0.18), rgba(2, 6, 23, 0.72));
+  }
+
+  .sign-camera-actions button {
+    min-height: 52px;
+  }
+
+  .sign-video-summary {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.05rem 1.1rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+    background: linear-gradient(180deg, rgba(8, 15, 30, 0.9), rgba(2, 6, 23, 0.98));
+  }
+
+  .sign-video-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .sign-video-summary-card {
+    padding: 0.85rem 0.9rem;
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: rgba(15, 23, 42, 0.64);
+  }
+
+  .sign-video-summary-label {
+    display: block;
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.45rem;
+  }
+
+  .sign-video-summary-value {
+    display: block;
+    color: #f8fafc;
+    font-size: 0.96rem;
+    line-height: 1.45;
+    font-weight: 600;
+  }
+
+  .sign-video-summary-copy {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.79rem;
+    line-height: 1.55;
+  }
+
+  .sign-video-hud {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 8;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .sign-video-hud span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.42rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(2, 6, 23, 0.68);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    color: #cbd5e1;
+    font-size: 0.76rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .sign-output-card {
+    background:
+      radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 36%),
+      rgba(15, 23, 42, 0.6) !important;
+  }
+
+  .translation-signal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .translation-signal-card {
+    padding: 0.95rem 1rem;
+    min-height: 154px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: rgba(2, 6, 23, 0.38);
+  }
+
+  .translation-signal-label {
+    color: #94a3b8;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  .translation-confidence-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.65rem;
+  }
+
+  .translation-confidence-track {
+    flex: 1;
+    height: 0.52rem;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+  }
+
+  .translation-confidence-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, rgba(96, 165, 250, 0.9), rgba(74, 222, 128, 0.95));
+    transition: width 0.28s ease, background 0.2s ease;
+  }
+
+  .translation-confidence-value {
+    color: #f8fafc;
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-width: 3.1rem;
+    text-align: right;
+  }
+
+  .translation-support-copy {
+    margin-top: 0.6rem;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .translation-engine-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(15, 23, 42, 0.72);
+    color: #e2e8f0;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .translation-engine-pill i {
+    color: #93c5fd;
+  }
+
+  .translation-copy-block {
+    padding: 1rem 1.05rem;
+    border-radius: 18px;
+    background: rgba(2, 6, 23, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  .supported-sign-card {
+    margin-top: 1rem;
+    padding: 1rem 1.05rem;
+    border-radius: 18px;
+    background: rgba(15, 23, 42, 0.42);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  .sign-video-support-panel {
+    grid-column: 1;
+    margin-top: 0;
+  }
+
+  .sign-guide-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .sign-guide-grid {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .sign-guide-card {
+    padding: 0.9rem 0.95rem;
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: rgba(2, 6, 23, 0.34);
+  }
+
+  .sign-guide-title {
+    display: block;
+    color: #e2e8f0;
+    font-size: 0.86rem;
+    font-weight: 700;
+    margin-bottom: 0.28rem;
+  }
+
+  .sign-guide-copy {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .supported-sign-card summary {
+    cursor: pointer;
+    list-style: none;
+    color: #e2e8f0;
+    font-weight: 600;
+  }
+
+  .supported-sign-card summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .supported-sign-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.9rem;
+  }
+
+  .supported-sign-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.68rem;
+    border-radius: 999px;
+    background: rgba(2, 6, 23, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+
+  .supported-sign-chip.caution {
+    border-color: rgba(251, 191, 36, 0.35);
+    color: #fde68a;
+    background: rgba(180, 83, 9, 0.18);
+  }
+
+  .sign-shell {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.75rem;
+    max-width: 1760px;
+    width: min(100%, 1760px);
+  }
+
+  .sign-control-rail {
+    flex: 0 0 340px;
+    max-width: 340px;
+  }
+
+  .hero-right {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sign-control-panel {
+    padding: 1.1rem 1.15rem 1.2rem;
+    border-radius: 22px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    background:
+      linear-gradient(180deg, rgba(15, 23, 42, 0.68), rgba(2, 6, 23, 0.5));
+    box-shadow: 0 18px 44px rgba(2, 6, 23, 0.26);
+  }
+
+  .sign-control-panel + .sign-control-panel {
+    margin-top: 1rem;
+  }
+
+  .sign-control-label {
+    display: block;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    margin-bottom: 0.45rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sign-control-support {
+    margin: 0.55rem 0 0 0;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .sign-select-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: end;
+  }
+
+  .sign-select-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    margin-bottom: 0.35rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(2, 6, 23, 0.42);
+    color: #64748b;
+  }
+
+  .sign-runtime-cluster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .sign-workspace-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(340px, 0.9fr);
+    gap: 1.5rem;
+    align-items: start;
+    width: 100%;
+  }
+
+  .sign-video-panel,
+  .sign-video-support-panel,
+  .sign-translation-panel {
+    min-width: 0;
+  }
+
+  .sign-video-panel {
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+  }
+
+  .sign-translation-panel {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .sign-video-panel .showcase-card {
+    height: 100%;
+  }
+
+  .sign-translation-panel .showcase-card,
+  .sign-translation-panel.sign-output-card {
+    height: 100%;
+  }
+
+  .sign-video-panel .video-wrapper-new {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+    background: radial-gradient(circle at top, rgba(59, 130, 246, 0.08), rgba(2, 6, 23, 0.96));
+  }
+
+  .sign-panel-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.42rem 0.68rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: rgba(15, 23, 42, 0.55);
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .sign-panel-kicker i {
+    color: #93c5fd;
+  }
+
+  .sign-translation-panel.sign-output-card {
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(2, 6, 23, 0.26);
+    padding: 1.7rem 1.7rem 1.5rem;
+  }
+
+  .sign-translation-panel .showcase-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sign-translation-panel .output-tabs {
+    margin-top: auto;
+  }
+
+  .sign-audio-stage {
+    min-height: 118px;
+    background: linear-gradient(180deg, rgba(2, 6, 23, 0.3), rgba(2, 6, 23, 0.62));
+    border: 1px solid rgba(148, 163, 184, 0.08);
+  }
+
+  .sign-hero-heading {
+    font-size: clamp(2.8rem, 5vw, 4.4rem);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+    margin-bottom: 1rem;
+  }
+
+  .sign-hero-subtitle {
+    max-width: 34rem;
+    margin-bottom: 2.2rem;
+    color: #cbd5e1;
+  }
+
+  .sign-route-panel {
+    margin-bottom: 1.2rem;
+  }
+
+  .sign-route-select {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    color: #f8fafc;
+    border: 1px solid rgba(255,255,255,0.1);
+    outline: none;
+  }
+
+  .sign-route-select:focus {
+    border-color: rgba(129, 140, 248, 0.65);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16);
+  }
+
+  .sign-status-panel {
+    margin-bottom: 1.2rem;
+  }
+
+  .sign-card-header {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .sign-output-block {
+    margin-bottom: 0;
+  }
+
+  .sign-output-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 0.75rem;
+  }
+
+  .sign-output-value {
+    display: block;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    line-height: 1.35;
+    color: #f8fafc;
+    text-align: left;
+    text-wrap: balance;
+  }
+
+  .sign-output-value.detected {
+    color: #4ade80;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+  }
+
+  .sign-output-value.translated {
+    color: #f8fafc;
+    font-weight: 600;
+  }
+
+  .sign-top-matches {
+    margin-top: 0.25rem;
+  }
+
+  .sign-match-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .sign-match-placeholder {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    color: #94a3b8;
+    font-size: 0.78rem;
+  }
+
+  .sign-session-card {
+    margin-top: 0.2rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    background: rgba(2, 6, 23, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+  }
+
+  .sign-session-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.9rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .sign-session-title {
+    color: #e2e8f0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .sign-session-support {
+    color: #94a3b8;
+    font-size: 0.78rem;
+    margin-top: 0.2rem;
+  }
+
+  .sign-session-actions {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .sign-session-btn {
+    padding: 0.52rem 0.84rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .sign-session-btn.primary {
+    border: 1px solid rgba(99, 102, 241, 0.32);
+    background: rgba(99, 102, 241, 0.14);
+    color: #c7d2fe;
+  }
+
+  .sign-session-btn.secondary {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(15, 23, 42, 0.5);
+    color: #cbd5e1;
+  }
+
+  .sign-session-text {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: #f8fafc;
+    min-height: 1.8rem;
+    text-align: left;
+  }
+
+  .sign-session-subtext {
+    margin-top: 0.55rem;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .sign-debug-card {
+    margin-top: 1rem;
+  }
+
+  .sign-debug-output {
+    margin: 0;
+    padding: 0.95rem 1rem;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(96, 165, 250, 0.16);
+    color: #bfdbfe;
+    font-size: 0.76rem;
+    line-height: 1.55;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 22rem;
+    overflow: auto;
+  }
+
+  .sign-output-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .sign-tab-btn {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sign-tab-btn.active {
+    border: 1px solid #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+  }
+
+  .sign-tab-btn.inactive {
+    border: 1px solid transparent;
+    background: transparent;
+    color: #94a3b8;
+  }
+
+  .sign-challenge-card {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .sign-challenge-title {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #e9d5ff;
+    text-transform: uppercase;
+  }
+
+  .sign-challenge-copy {
+    margin: 0.2rem 0 0 0;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .sign-challenge-target {
+    color: #c084fc;
+  }
+
+  .sign-challenge-feedback {
+    display:none;
+    background: rgba(34, 197, 94, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #fff;
+    font-weight: bold;
+  }
+
+  @media (max-width: 980px) {
+    .translation-signal-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sign-shell {
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+
+    .sign-control-rail {
+      flex-basis: auto;
+      max-width: none;
+    }
+
+    .sign-select-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sign-select-arrow {
+      margin: 0 auto;
+    }
+
+    .sign-workspace-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sign-video-panel {
+      width: 100%;
+      justify-self: stretch;
+    }
+
+    .sign-translation-panel {
+      grid-column: auto;
+      grid-row: auto;
+    }
+
+    .sign-video-panel .video-wrapper-new {
+      aspect-ratio: 16 / 9;
+      min-height: 0;
+    }
+
+    .sign-camera-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .sign-video-summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sign-session-header,
+    .sign-challenge-card {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .sign-session-actions {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .sign-session-actions .sign-session-btn {
+      flex: 1;
+      text-align: center;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section id="sign-to-text-view" class="page-view active">
+  <div class="hero-new sign-hero-shell">
+    <!-- Abstract Backgrounds -->
+    <div class="hero-bg-blob blob-1"></div>
+    <div class="hero-bg-blob blob-2" style="right: 0; left: auto;"></div>
+
+    <div class="hero-content sign-shell">
+
+      <!-- LEFT COLUMN: CONTROLS & INFO -->
+      <div class="hero-left sign-control-rail">
+        <div class="hero-badge-new" style="margin-bottom: 1.5rem;">
+          <span class="badge-dot" style="background: #22c55e; box-shadow: 0 0 10px #22c55e;"></span>
+          <span class="badge-text" id="partial-status">System Ready</span>
+        </div>
+
+        <h1 class="hero-heading-new sign-hero-heading">
+          Live Sign <br />
+          <span class="gradient-text">Translation</span>
+        </h1>
+
+        <p class="hero-subtitle-new sign-hero-subtitle">
+          Turn on your camera to instantly translate Indian Sign Language into fluent text and spoken audio.
+        </p>
+
+        <div class="sign-flow-strip" aria-label="Translation flow overview">
+          <span class="sign-flow-chip"><i class="fas fa-hands"></i> Capture hands</span>
+          <span class="sign-flow-chip"><i class="fas fa-language"></i> Resolve sentence</span>
+          <span class="sign-flow-chip"><i class="fas fa-volume-high"></i> Speak accepted phrase</span>
+        </div>
+
+        <div class="sign-control-panel sign-route-panel">
+          <div class="sign-control-label">Translation Route</div>
+          <div class="sign-select-grid">
+            <div>
+              <label class="sign-control-label" for="signLang" style="margin-bottom: 0.45rem;">Input Sign Language</label>
+              <select id="signLang" class="lang-selector sign-route-select">
+                <option value="ISL" selected>Indian Sign Language (ISL sentence model)</option>
+              </select>
+            </div>
+            <div class="sign-select-arrow">
+              <i class="fas fa-arrow-right"></i>
+            </div>
+            <div>
+              <label class="sign-control-label" for="outLang" style="margin-bottom: 0.45rem;">Output Language</label>
+              <select id="outLang" class="lang-selector sign-route-select">
+                <option value="english" selected>English</option>
+                <option value="telugu">Telugu</option>
+                <option value="hindi">Hindi</option>
+                <option value="malayalam">Malayalam</option>
+                <option value="kannada">Kannada</option>
+                <option value="tamil">Tamil</option>
+                <option value="spanish">Spanish</option>
+                <option value="french">French</option>
+              </select>
+            </div>
+          </div>
+          <p class="sign-control-support">The live page now queries the broader pose corpus first, then confirms the best translation route.</p>
+        </div>
+
+        <div class="sign-control-panel sign-status-panel">
+	        <div id="adaptive-mode-controls">
+	          <label class="sign-control-label">Adaptive Detection Mode</label>
+	          <div style="display: flex; gap: 0.75rem;">
+	            <button type="button" id="mode-accuracy-btn"
+	              style="flex: 1; padding: 0.7rem 0.9rem; border-radius: 10px; border: 1px solid rgba(74, 222, 128, 0.45); background: rgba(34, 197, 94, 0.15); color: #86efac; font-weight: 600; cursor: pointer;">
+	              Accuracy
+	            </button>
+	            <button type="button" id="mode-fallback-btn"
+	              style="flex: 1; padding: 0.7rem 0.9rem; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.45); color: #94a3b8; font-weight: 600; cursor: pointer;">
+	              Fallback
+	            </button>
+	          </div>
+	          <p id="mode-helper-text" class="sign-control-support">
+	            Accuracy suppresses uncertain guesses. Fallback allows best-effort guesses with a visible Guess badge.
+	          </p>
+	        </div>
+
+	        <div id="runtime-badges" class="sign-runtime-cluster" style="margin-top: 1rem;">
+	          <span id="badge-stable"
+	            style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.34rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; border: 1px solid rgba(148, 163, 184, 0.25); color: #94a3b8; background: rgba(15, 23, 42, 0.45);">
+	            Stable
+	          </span>
+	          <span id="badge-guess"
+	            style="display: none; align-items: center; gap: 0.35rem; padding: 0.34rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; border: 1px solid rgba(251, 191, 36, 0.35); color: #fde68a; background: rgba(180, 83, 9, 0.22);">
+	            Guess
+	          </span>
+	          <span id="badge-model"
+	            style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.34rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; border: 1px solid rgba(251, 191, 36, 0.35); color: #fde68a; background: rgba(180, 83, 9, 0.22);">
+	            Model warming
+	          </span>
+	          <span id="badge-hand"
+	            style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.34rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; border: 1px solid rgba(148, 163, 184, 0.25); color: #94a3b8; background: rgba(15, 23, 42, 0.45);">
+	            No hand
+	          </span>
+	          <span id="badge-engine"
+	            style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.34rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; border: 1px solid rgba(148, 163, 184, 0.25); color: #94a3b8; background: rgba(15, 23, 42, 0.45);">
+	            Engine: none
+	          </span>
+	        </div>
+        </div>
+
+        <div class="sign-control-panel sign-guide-panel">
+          <div class="sign-control-label">Live Capture Guide</div>
+          <div class="sign-guide-grid">
+            <div class="sign-guide-card">
+              <span class="sign-guide-title">Frame Clearly</span>
+              <p class="sign-guide-copy">Keep your upper body centered and both hands visible before starting the next sign.</p>
+            </div>
+            <div class="sign-guide-card">
+              <span class="sign-guide-title">Hold Each Sign</span>
+              <p class="sign-guide-copy">Pause briefly at the end of a gesture so the model has time to settle on the strongest phrase.</p>
+            </div>
+            <div class="sign-guide-card">
+              <span class="sign-guide-title">Sign Smoothly</span>
+              <p class="sign-guide-copy">Avoid quick jumps in and out of frame. Cleaner motion gives more accurate text and voice output.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: VIDEO & OUTPUT SHOWCASE -->
+        <div class="hero-right">
+        <div class="sign-workspace-grid">
+
+        <!-- Showcase Video Window -->
+        <div class="hero-showcase sign-video-panel" style="margin: 0;">
+          <div class="showcase-card sign-video-card"
+            style="padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000;">
+            <div class="showcase-header"
+              style="position: absolute; top: 0; left: 0; right: 0; z-index: 10; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); padding: 1rem 1.5rem; border: none;">
+              <span class="sign-panel-kicker">
+                <span class="pulse-dot" style="background: #22c55e;"></span>
+                <span id="source-meta">ISL Camera Feed</span>
+              </span>
+            </div>
+
+            <div class="video-wrapper-new" style="position: relative; width: 100%;">
+              <!-- Invisible Placeholder Icon -->
+              <div
+                style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1;">
+                <i class="fas fa-camera"
+                  style="font-size: 3rem; color: rgba(255,255,255,0.05); margin-bottom: 1rem;"></i>
+              </div>
+
+              <video id="signVideo" autoplay muted playsinline
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; transform: scaleX(-1);"></video>
+              <canvas id="overlay"
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 5; transform: scaleX(-1);"></canvas>
+              <div class="sign-video-hud">
+                <span><i class="fas fa-camera-rotate"></i> Mirror view for natural signing</span>
+                <span><i class="fas fa-wave-square"></i> Voice follows the accepted phrase</span>
+              </div>
+            </div>
+
+            <div class="sign-camera-actions">
+              <button id="signBtn" class="btn-primary-new"
+                style="border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 1rem 1.1rem;">
+                <i class="fas fa-video"></i>
+                <span>Start Camera</span>
+              </button>
+
+              <button id="stop-live-btn" class="btn-secondary-new"
+                style="border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.65rem; padding: 1rem 1.1rem;"
+                disabled>
+                <i class="fas fa-stop"></i>
+                <span>Stop</span>
+              </button>
+            </div>
+
+            <div class="sign-video-summary">
+              <div class="sign-video-summary-grid">
+                <div class="sign-video-summary-card">
+                  <span class="sign-video-summary-label">Frame Goal</span>
+                  <span class="sign-video-summary-value">Keep your upper body centered with both hands visible.</span>
+                </div>
+                <div class="sign-video-summary-card">
+                  <span class="sign-video-summary-label">Live Output</span>
+                  <span class="sign-video-summary-value">Stable phrases are accepted first, then spoken in Voice Mode.</span>
+                </div>
+              </div>
+              <p class="sign-video-summary-copy">
+                Hold each sign for a brief moment and avoid leaving the frame between gestures. The clearer the hand shape and motion, the faster the live translation settles.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="supported-sign-card sign-video-support-panel">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.8rem;">
+            <div>
+              <div style="color: #e2e8f0; font-size: 0.92rem; font-weight: 700; letter-spacing: 0.02em;">Supported Sign Set</div>
+              <div id="supported-sign-summary" style="margin-top: 0.28rem; color: #94a3b8; font-size: 0.78rem; line-height: 1.5;">
+                Loading the local phrase coverage...
+              </div>
+            </div>
+            <div id="supported-sign-count"
+              style="display: inline-flex; align-items: center; justify-content: center; min-width: 3rem; padding: 0.42rem 0.7rem; border-radius: 999px; border: 1px solid rgba(96, 165, 250, 0.35); background: rgba(37, 99, 235, 0.18); color: #bfdbfe; font-size: 0.82rem; font-weight: 700;">
+              --
+            </div>
+          </div>
+          <details style="margin-top: 0.9rem;">
+            <summary>View active phrases</summary>
+            <div id="supported-sign-list" class="supported-sign-chip-list">
+              <span class="supported-sign-chip">Loading...</span>
+            </div>
+            <div id="supported-sign-caution" style="margin-top: 0.85rem; color: #94a3b8; font-size: 0.76rem; line-height: 1.5;">
+              Reliability notes will appear here.
+            </div>
+          </details>
+        </div>
+
+        <!-- Showcase Output Window -->
+        <div class="showcase-card sign-output-card sign-translation-panel">
+          <div class="showcase-header sign-card-header">
+            <span class="sign-panel-kicker">
+              <i class="fas fa-language"></i>
+              <span>Live Translation</span>
+            </span>
+          </div>
+
+          <div class="showcase-body">
+            <!-- Output Control Tabs -->
+            <div class="output-tabs sign-output-tabs">
+              <button class="tab-btn sign-tab-btn active" data-tab="translationTab"
+                style="margin: 0;">
+                <i class="fas fa-comment-alt" style="margin-right: 0.5rem;"></i> Text Output
+              </button>
+              <button class="tab-btn sign-tab-btn inactive" data-tab="audioTab"
+                style="margin: 0;">
+                <i class="fas fa-volume-up" style="margin-right: 0.5rem;"></i> Voice Mode
+              </button>
+            </div>
+
+            <div class="translation-signal-grid" data-tab-content="translationTab">
+              <div class="translation-signal-card">
+                <div class="translation-signal-label">Translation Route</div>
+                <div id="live-engine-inline" class="translation-engine-pill">
+                  <i class="fas fa-satellite-dish"></i>
+                  <span id="live-engine-text">Engine idle</span>
+                </div>
+                <div id="voice-mode-note" class="translation-support-copy">
+                  Text output is primary. Switch to Voice Mode to speak the accepted phrase.
+                </div>
+              </div>
+              <div class="translation-signal-card">
+                <div class="translation-signal-label">Live Signal</div>
+                <div class="translation-confidence-row">
+                  <div class="translation-confidence-track" aria-hidden="true">
+                    <div id="live-confidence-fill" class="translation-confidence-fill"></div>
+                  </div>
+                  <div id="live-confidence-value" class="translation-confidence-value">0%</div>
+                </div>
+                <div class="translation-support-copy">
+                  Confidence rises when the same sign remains stable across recent frames.
+                </div>
+              </div>
+            </div>
+
+            <!-- Audio Output (Hidden Native element handled by JS, strictly logic) -->
+            <div class="audio-player-new sign-audio-stage"
+              style="display: none; width: 100%; margin-bottom: 2rem; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);"
+              data-tab-content="audioTab">
+              <div id="audio-bars" class="audio-bars-new"
+                style="display: flex; gap: 6px; height: 30px; align-items: center;">
+                <div class="bar"
+                  style="width: 4px; height: 40%; background: #6366f1; border-radius: 2px; transition: height 0.1s;">
+                </div>
+                <div class="bar"
+                  style="width: 4px; height: 80%; background: #818cf8; border-radius: 2px; transition: height 0.1s;">
+                </div>
+                <div class="bar"
+                  style="width: 4px; height: 100%; background: #4f46e5; border-radius: 2px; transition: height 0.1s;">
+                </div>
+                <div class="bar"
+                  style="width: 4px; height: 60%; background: #6366f1; border-radius: 2px; transition: height 0.1s;">
+                </div>
+                <div class="bar"
+                  style="width: 4px; height: 30%; background: #818cf8; border-radius: 2px; transition: height 0.1s;">
+                </div>
+              </div>
+            </div>
+
+            <div class="showcase-row translation-copy-block sign-output-block" data-tab-content="translationTab">
+              <span class="label sign-output-label">Detected Sign</span>
+              <span class="value sign-output-value detected" id="signTranscript">Waiting...</span>
+            </div>
+
+            <div class="showcase-divider" style="background: rgba(255,255,255,0.05); margin: 1.5rem 0;"
+              data-tab-content="translationTab"></div>
+
+            <div class="showcase-row translation-copy-block sign-output-block" data-tab-content="translationTab">
+              <span class="label sign-output-label" id="target-meta">EN</span>
+              <span class="value primary sign-output-value translated" id="translated-box">Translation will appear
+                here</span>
+            </div>
+
+            <div class="sign-top-matches" data-tab-content="translationTab">
+              <span class="label sign-output-label">Top Matches</span>
+              <div id="top-predictions" class="sign-match-list">
+                <span class="sign-match-placeholder">
+                  Waiting for a stable sign
+                </span>
+              </div>
+            </div>
+
+            <div class="sign-session-card" data-tab-content="translationTab">
+              <div class="sign-session-header">
+                <div>
+                  <div class="sign-session-title">Session Phrase</div>
+                  <div class="sign-session-support">Accepted signs are collected into a running phrase.</div>
+                </div>
+                <div class="sign-session-actions">
+                  <button id="session-speak-btn" type="button" class="sign-session-btn primary">
+                    Speak phrase
+                  </button>
+                  <button id="session-clear-btn" type="button" class="sign-session-btn secondary">
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              <div id="session-transcript" class="sign-session-text">
+                No phrase yet
+              </div>
+              <div id="session-english" class="sign-session-subtext">
+                Accepted signs will build a running phrase here.
+              </div>
+            </div>
+
+            <div class="sign-session-card sign-debug-card" data-tab-content="translationTab">
+              <div class="sign-session-header">
+                <div>
+                  <div class="sign-session-title">Debug Trace</div>
+                  <div class="sign-session-support">Temporary ML diagnostics for tensor shapes, ranges, probabilities, and trigger state.</div>
+                </div>
+              </div>
+              <pre id="sign-debug-output" class="sign-debug-output">Waiting for live debug data.</pre>
+            </div>
+          </div>
+
+          <!-- Audio Output (Hidden Native element handled by JS, strictly logic) -->
+          <audio id="audio-output" class="hidden"></audio>
+        </div>
+        </div>
+
+        <!-- CHALLENGE MODE UI -->
+        <div id="challenge-mode-container" style="display:none; width: 100%;">
+          <div class="showcase-card sign-challenge-card">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <i class="fas fa-trophy" style="font-size: 1.5rem; color: #d8b4fe;"></i>
+              <div>
+                <h3 class="sign-challenge-title">Challenge</h3>
+                <p class="sign-challenge-copy">
+                  Sign: <strong id="challenge-target" class="sign-challenge-target">...</strong>
+                </p>
+              </div>
+            </div>
+            <div id="challenge-feedback" class="sign-challenge-feedback">
+              <i class="fas fa-check-circle" style="color: #4ade80;"></i> +10 XP
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}{% endblock %}

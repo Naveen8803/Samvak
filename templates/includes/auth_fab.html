@@ -1,0 +1,33 @@
+<!-- AUTH FLOATING PILL -->
+<div class="auth-fab">
+    {% if current_user.is_authenticated %}
+    <button id="auth-toggle-btn" class="auth-toggle">
+        <div class="auth-avatar" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            {{ current_user.username[:2].upper() }}
+        </div>
+        <span class="auth-label">{{ current_user.username }}</span>
+    </button>
+    <div id="auth-account-menu" class="auth-menu">
+        <div class="auth-menu-header">
+            <div class="auth-user-name">{{ current_user.username }}</div>
+            <div class="auth-user-email">{{ current_user.email }}</div>
+        </div>
+        <div class="auth-menu-body">
+            <a href="{{ url_for('dashboard') }}" class="auth-menu-item">
+                Dashboard
+            </a>
+            <a href="{{ url_for('auth.settings') }}" class="auth-menu-item">
+                Account Settings
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="auth-menu-item">
+                Sign out
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <a href="{{ url_for('auth.login') }}" id="auth-toggle-btn" class="auth-toggle" style="text-decoration: none;">
+        <span class="auth-avatar">?</span>
+        <span class="auth-label">Sign in</span>
+    </a>
+    {% endif %}
+</div>

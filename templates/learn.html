@@ -1,0 +1,694 @@
+{% extends 'base.html' %}
+
+{% block title %}Samvak - Learn Signs{% endblock %}
+{% block content %}
+<!-- LEARN PAGE (Merged with Dictionary) -->
+<section id="learn-section" class="page-view active">
+  <div class="page-container">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div>
+          <h1>Learn Sign Language</h1>
+          <p>Browse our collection, watch the signs, and practice them live in the camera.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section" style="margin-bottom: 2rem;">
+      <div class="search-bar-container">
+        <input type="text" id="dict-search" placeholder="Search for a sign (e.g., Hello, Thank you)..."
+          class="search-input">
+        <button id="search-btn" class="search-btn">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Chips -->
+    <div class="learn-categories" id="chip-container">
+      <!-- Dynamic chips injected here -->
+      <button class="category-btn active" data-category="All">All</button>
+    </div>
+
+    <!-- Dynamic Grid -->
+    <div class="learn-grid-new" id="learn-grid">
+      <div class="loading-state">
+        <div class="loader"></div>
+        <p>Loading signs library...</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Preview Modal -->
+<div id="preview-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modal-word-title">Word Title</h2>
+      <button class="close-modal">&times;</button>
+    </div>
+
+    <div class="image-sequence-container">
+      <!-- Media Container -->
+      <div id="media-wrapper"
+        style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+        <img id="sequence-display" src="" alt="Sign Language Gesture" style="display:none;">
+        <video id="video-display" controls style="display:none; width:100%; height:100%; object-fit:contain;" loop
+          playsinline></video>
+      </div>
+
+      <!-- Controls for Image Sequence -->
+      <div class="controls" id="sequence-controls">
+        <button id="play-btn" class="modal-btn"><i class="fas fa-play"></i> Play / Pause</button>
+      </div>
+
+      <!-- Progress Bar for Image Sequence -->
+      <div class="progress-bar-modal" id="sequence-progress">
+        <div id="progress-fill"></div>
+      </div>
+
+      <!-- Quality Badge (Visual) -->
+      <div class="quality-badge">HD Quality</div>
+    </div>
+
+
+  </div>
+</div>
+
+<style>
+  /* Search Styling */
+  .search-bar-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 1rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    background: rgba(15, 23, 42, 0.8);
+  }
+
+  /* New Search Button (Icon Only) */
+  .search-btn {
+    background: transparent;
+    border: none;
+    color: #a5b4fc;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-btn:hover {
+    color: #fff;
+    background: rgba(99, 102, 241, 0.2);
+    transform: scale(1.1);
+  }
+
+  /* Category Chips */
+  .learn-categories {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .category-btn {
+    padding: 0.5rem 1.2rem;
+    background: transparent;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #9ca3af;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .category-btn:hover {
+    border-color: rgba(99, 102, 241, 0.6);
+    color: #e5e7eb;
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  .category-btn.active {
+    background: linear-gradient(135deg, #6366f1 0, #8b5cf6 100%);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  /* Grid & Card Styling Override/Reuse from styles.css */
+  .learn-grid-new {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+    min-height: 200px;
+  }
+
+  .sign-card-new {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .sign-card-new::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .sign-card-new:hover {
+    transform: translateY(-8px);
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 15px rgba(99, 102, 241, 0.2);
+    background: rgba(15, 23, 42, 0.8);
+  }
+
+  .sign-card-header {
+    position: relative;
+    z-index: 2;
+  }
+
+  .sign-card-new h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 0.3rem 0;
+    letter-spacing: -0.02em;
+  }
+
+  .sign-category {
+    display: inline-block;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    background: rgba(148, 163, 184, 0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .loading-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: #9ca3af;
+    gap: 1rem;
+  }
+
+  /* Buttons */
+  .button-row {
+    display: flex;
+    gap: 0.8rem;
+    z-index: 2;
+    margin-top: auto;
+  }
+
+  /* Improved Watch Button */
+  .btn-watch {
+    flex: 1.3;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    padding: 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-watch:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.5);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  }
+
+  .btn-practice {
+    flex: 1;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #cbd5e1;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem;
+  }
+
+  .btn-practice:hover {
+    background: rgba(30, 41, 59, 1);
+    color: #fff;
+    border-color: rgba(148, 163, 184, 0.4);
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(12px);
+    z-index: 10000;
+    /* SUPER HIGH Z-INDEX TO FIX CLICK ISSUE */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal-content {
+    background: #0f172a;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 24px;
+    padding: 0;
+    width: 95%;
+    max-width: 700px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-header {
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 2;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #f1f5f9;
+  }
+
+  .close-modal {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+    position: static;
+  }
+
+  .close-modal:hover {
+    color: #fff;
+  }
+
+  .image-sequence-container {
+    background: #000;
+    position: relative;
+    aspect-ratio: 16/9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #sequence-display {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .image-sequence-container:hover .controls {
+    opacity: 1;
+  }
+
+  .modal-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+    transform: scale(1);
+  }
+
+  .modal-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+  }
+
+  .progress-bar-modal {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 20;
+  }
+
+  #progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #3b82f6;
+    transition: width 0.1s linear;
+  }
+
+  .quality-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 15;
+  }
+
+  .modal-actions {
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let allWords = [];
+  let currentCategory = 'All';
+
+  // --- GLOBAL HELPERS FOR INLINE EVENTS ---
+  function handleWatchClick(e, word) {
+    if (e) e.stopPropagation();
+    console.log("Watch clicked for:", word);
+    openModal(word);
+  }
+
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('learn-grid');
+    const searchInput = document.getElementById('dict-search');
+    const chipContainer = document.getElementById('chip-container');
+
+    // --- 1. FETCH WORDS ---
+    fetch('/api/dictionary/words')
+      .then(res => {
+        if (!res.ok) throw new Error("Server error");
+        return res.json();
+      })
+      .then(data => {
+        allWords = data;
+        const categories = new Set(['All']);
+        data.forEach(item => {
+          if (item.category) categories.add(item.category);
+        });
+        renderChips(Array.from(categories).sort());
+        renderWords(data);
+      })
+      .catch(err => {
+        grid.innerHTML = '<div class="loading-state"><p style="color:#ef4444">Failed to load signs. Please refresh.</p></div>';
+        console.error(err);
+      });
+
+    // --- 2. RENDER CHIPS ---
+    function renderChips(categories) {
+      chipContainer.innerHTML = '';
+      const sortedCats = ['All', ...categories.filter(c => c !== 'All')];
+      sortedCats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${cat === 'All' ? 'active' : ''}`;
+        btn.textContent = cat;
+        btn.onclick = () => filterByCategory(cat);
+        chipContainer.appendChild(btn);
+      });
+    }
+
+    // --- 3. FILTER LOGIC ---
+    function filterByCategory(category) {
+      currentCategory = category;
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        if (btn.textContent === category) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      const term = searchInput.value.toLowerCase();
+      applyFilters(term, category);
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      applyFilters(term, currentCategory);
+    });
+
+    function applyFilters(term, category) {
+      const filtered = allWords.filter(item => {
+        const matchesSearch = item.word.toLowerCase().replace(/_/g, ' ').includes(term);
+        const matchesCat = category === 'All' || item.category === category;
+        return matchesSearch && matchesCat;
+      });
+      renderWords(filtered);
+    }
+
+    // --- 4. RENDER WORDS ---
+    function renderWords(wordList) {
+      grid.innerHTML = '';
+      if (wordList.length === 0) {
+        grid.innerHTML = '<div class="loading-state"><p>No signs found.</p></div>';
+        return;
+      }
+      wordList.forEach(item => {
+        const word = item.word;
+        const category = item.category || "General";
+        const displayName = word.replace(/_/g, ' ');
+
+        const card = document.createElement('article');
+        card.className = 'sign-card-new';
+
+        // Note: Using inline onclicks for robustness
+        card.innerHTML = `
+                <div class="sign-card-header">
+                    <p class="sign-category">${category}</p>
+                    <h3>${displayName}</h3>
+                </div>
+                <!-- Action Buttons -->
+                <div class="button-row">
+                    <button class="btn-watch btn-preview" onclick="handleWatchClick(event, '${word}')">
+                       <i class="fas fa-play"></i> Watch
+                    </button>
+                    <a href="/sign-to-text?challenge=${word}" class="btn-practice" onclick="event.stopPropagation()">
+                       <i class="fas fa-video"></i> Practice
+                    </a>
+                </div>
+            `;
+
+        // Card click fallback
+        card.onclick = () => openModal(word);
+        grid.appendChild(card);
+      });
+    }
+
+    // --- 5. MODAL LOGIC ---
+    const modal = document.getElementById('preview-modal');
+    const modalTitle = document.getElementById('modal-word-title');
+    const imgDisplay = document.getElementById('sequence-display');
+    const videoDisplay = document.getElementById('video-display');
+    const sequenceControls = document.getElementById('sequence-controls');
+    const sequenceProgress = document.getElementById('sequence-progress');
+    const closeBtn = document.querySelector('.close-modal');
+    const playBtn = document.getElementById('play-btn');
+
+    const progressFill = document.getElementById('progress-fill');
+
+    let currentImages = [];
+    let isPlaying = false;
+    let frameIndex = 0;
+    let animationInterval = null;
+    let currentWord = "";
+
+    // Expose openModal to global scope for the inline handler
+    window.openModal = function (word) {
+      console.log("Opening modal for:", word);
+      currentWord = word;
+      modalTitle.innerText = word.replace(/_/g, ' ');
+      modal.classList.add('active'); // CSS display:flex, opacity:1
+
+      // Reset
+      imgDisplay.style.display = 'none';
+      videoDisplay.style.display = 'none';
+
+
+
+      fetch(`/api/dictionary/images/${word}`)
+        .then(res => {
+          if (!res.ok) throw new Error(`Failed to load media (${res.status})`);
+          return res.json();
+        })
+        .then(response => {
+          console.log("Got response:", response);
+
+          if (response.type === 'video') {
+            // VIDEO
+            videoDisplay.style.display = 'block';
+            sequenceControls.style.display = 'none';
+            sequenceProgress.style.display = 'none';
+            videoDisplay.src = `/api/dictionary/serve/${currentWord}/${response.src}`;
+            videoDisplay.play().catch(e => console.log("Auto-play blocked", e));
+          } else {
+            // IMAGES
+            const images = Array.isArray(response) ? response : (response.files || []);
+
+            videoDisplay.style.display = 'none';
+            imgDisplay.style.display = 'block';
+            sequenceControls.style.display = 'flex';
+            sequenceProgress.style.display = 'block';
+
+            currentImages = images;
+            frameIndex = 0;
+            if (images && images.length > 0) {
+              showFrame(0);
+              playSequence();
+            } else {
+              alert("No content available for " + word);
+            }
+          }
+        })
+        .catch(err => {
+          console.error("Error loading sign:", err);
+          alert("Could not load sign data. Check console.");
+        });
+    }
+
+    function showFrame(index) {
+      if (!currentImages.length) return;
+      const filename = currentImages[index];
+      imgDisplay.src = `/api/dictionary/serve/${currentWord}/${filename}`;
+      const pct = ((index + 1) / currentImages.length) * 100;
+      progressFill.style.width = `${pct}%`;
+    }
+
+    function playSequence() {
+      if (isPlaying) return;
+      isPlaying = true;
+      playBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+      if (animationInterval) clearInterval(animationInterval);
+      animationInterval = setInterval(() => {
+        frameIndex++;
+        if (frameIndex >= currentImages.length) frameIndex = 0;
+        showFrame(frameIndex);
+      }, 150);
+    }
+
+    function stopSequence() {
+      isPlaying = false;
+      playBtn.innerHTML = '<i class="fas fa-play"></i> Play';
+      clearInterval(animationInterval);
+    }
+
+    playBtn.onclick = () => {
+      if (isPlaying) stopSequence();
+      else playSequence();
+    };
+
+    const closeModalFunc = () => {
+      console.log("Closing modal");
+      modal.classList.remove('active');
+      stopSequence();
+      if (videoDisplay) {
+        videoDisplay.pause();
+        videoDisplay.src = "";
+      }
+    };
+
+    if (closeBtn) closeBtn.onclick = closeModalFunc;
+
+    window.onclick = (e) => {
+      // If clicking overlay
+      if (e.target === modal) closeModalFunc();
+    };
+  });
+</script>
+{% endblock %}
+{% block footer %}{% endblock %}

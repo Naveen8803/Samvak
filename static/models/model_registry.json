@@ -1,0 +1,334 @@
+{
+  "model_version": "posehands-tcn-v1",
+  "class_set_version": "prod-40-v1",
+  "feature_schema": "pose_hands_258_v1",
+  "input_feature_size": 258,
+  "sequence_length": 30,
+  "threshold_version": "prod-40-v1",
+  "created_at": "2026-03-13T06:04:13Z",
+  "class_count": 40,
+  "labels": [
+    "are you free today",
+    "can i help you",
+    "comb your hair",
+    "could you please talk slower",
+    "do not make me angry",
+    "do not worry",
+    "go and sleep",
+    "he is going into the room",
+    "he would be coming today",
+    "how can i trust you",
+    "how old are you",
+    "i am afraid of that",
+    "i am fine thank you sir",
+    "i am in dilemma what to do",
+    "i am really grateful",
+    "i am sitting in the class",
+    "i am so sorry to hear that",
+    "i do not agree",
+    "i do not like it",
+    "i do not mean it",
+    "i enjoyed a lot",
+    "i got hurt",
+    "i like you i love you",
+    "i somehow got to know about it",
+    "i was stopped by some one",
+    "it does not make any difference to me",
+    "it was nice chatting with you",
+    "let him take time",
+    "pour some more water into the glass",
+    "serve the food",
+    "shall we go outside",
+    "speak softly",
+    "take care of yourself",
+    "try to understand",
+    "what did you tell him",
+    "what is your phone number",
+    "which collegeschool are you from",
+    "you are bad",
+    "you can do it",
+    "you need a medicine take this one"
+  ],
+  "selection_method": "data_quality_first",
+  "min_clips_per_class": 7,
+  "max_classes": 40,
+  "manifest_path": "model_data/data_manifest.json",
+  "data_roots": [
+    "model_data",
+    "dataset_imports"
+  ],
+  "imported_data_path": "dataset_imports",
+  "allowed_license_tags": [
+    "local_internal",
+    "government_open_data_india",
+    "cc_by_4_0"
+  ],
+  "allowed_source_datasets": [],
+  "allowed_capture_sources": [],
+  "production_classes_path": "model_data/production_classes.json",
+  "labels_path": "static/models/tfjs_lstm/labels.json",
+  "thresholds_path": "static/models/tfjs_lstm/class_thresholds.json",
+  "tfjs_model_path": "static/models/tfjs_lstm/model.json",
+  "backend_model_path": "sign_language.h5",
+  "evaluation": {
+    "top1_accuracy": 0.9457,
+    "top3_accuracy": 0.967,
+    "macro_f1": 0.9228,
+    "precision_floor": 0.0,
+    "gates": {
+      "top1_gte_0_85": true,
+      "macro_f1_gte_0_80": true,
+      "precision_floor_gte_0_75": false
+    },
+    "per_class": {
+      "are you free today": {
+        "support": 25,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "can i help you": {
+        "support": 26,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "comb your hair": {
+        "support": 22,
+        "precision": 1.0,
+        "recall": 0.8182,
+        "f1": 0.9
+      },
+      "could you please talk slower": {
+        "support": 30,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "do not make me angry": {
+        "support": 24,
+        "precision": 0.8519,
+        "recall": 0.9583,
+        "f1": 0.902
+      },
+      "do not worry": {
+        "support": 21,
+        "precision": 0.8077,
+        "recall": 1.0,
+        "f1": 0.8936
+      },
+      "go and sleep": {
+        "support": 14,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "he is going into the room": {
+        "support": 34,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "he would be coming today": {
+        "support": 35,
+        "precision": 0.9722,
+        "recall": 1.0,
+        "f1": 0.9859
+      },
+      "how can i trust you": {
+        "support": 29,
+        "precision": 1.0,
+        "recall": 0.9655,
+        "f1": 0.9825
+      },
+      "how old are you": {
+        "support": 28,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "i am afraid of that": {
+        "support": 16,
+        "precision": 1.0,
+        "recall": 0.9375,
+        "f1": 0.9677
+      },
+      "i am fine thank you sir": {
+        "support": 28,
+        "precision": 1.0,
+        "recall": 0.4643,
+        "f1": 0.6341
+      },
+      "i am in dilemma what to do": {
+        "support": 38,
+        "precision": 0.9737,
+        "recall": 0.9737,
+        "f1": 0.9737
+      },
+      "i am really grateful": {
+        "support": 8,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "i am sitting in the class": {
+        "support": 40,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "i am so sorry to hear that": {
+        "support": 16,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "i do not agree": {
+        "support": 50,
+        "precision": 0.94,
+        "recall": 0.94,
+        "f1": 0.94
+      },
+      "i do not like it": {
+        "support": 26,
+        "precision": 0.7037,
+        "recall": 0.7308,
+        "f1": 0.717
+      },
+      "i do not mean it": {
+        "support": 27,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "i enjoyed a lot": {
+        "support": 23,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "i got hurt": {
+        "support": 27,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "i like you i love you": {
+        "support": 16,
+        "precision": 0.6957,
+        "recall": 1.0,
+        "f1": 0.8205
+      },
+      "i somehow got to know about it": {
+        "support": 26,
+        "precision": 0.9412,
+        "recall": 0.6154,
+        "f1": 0.7442
+      },
+      "i was stopped by some one": {
+        "support": 31,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "it does not make any difference to me": {
+        "support": 33,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "it was nice chatting with you": {
+        "support": 36,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "let him take time": {
+        "support": 23,
+        "precision": 0.92,
+        "recall": 1.0,
+        "f1": 0.9583
+      },
+      "pour some more water into the glass": {
+        "support": 23,
+        "precision": 0.92,
+        "recall": 1.0,
+        "f1": 0.9583
+      },
+      "serve the food": {
+        "support": 16,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "shall we go outside": {
+        "support": 8,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "speak softly": {
+        "support": 19,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "take care of yourself": {
+        "support": 25,
+        "precision": 0.9259,
+        "recall": 1.0,
+        "f1": 0.9615
+      },
+      "try to understand": {
+        "support": 40,
+        "precision": 0.7018,
+        "recall": 1.0,
+        "f1": 0.8247
+      },
+      "what did you tell him": {
+        "support": 19,
+        "precision": 1.0,
+        "recall": 0.7368,
+        "f1": 0.8485
+      },
+      "what is your phone number": {
+        "support": 29,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "which collegeschool are you from": {
+        "support": 38,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "you are bad": {
+        "support": 11,
+        "precision": 0.8462,
+        "recall": 1.0,
+        "f1": 0.9167
+      },
+      "you can do it": {
+        "support": 20,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "you need a medicine take this one": {
+        "support": 31,
+        "precision": 0.9688,
+        "recall": 1.0,
+        "f1": 0.9841
+      }
+    }
+  },
+  "tfjs_weights_paths": [
+    "group1-shard1of1.weights"
+  ],
+  "tfjs_runtime_version": "4.22.0",
+  "tfjs_converter_version": "4.22.0",
+  "schema_manifest_path": "static/models/schema_manifest.json",
+  "schema_hash": "dec09b4f22199395c292933645922c773f7bd6144e7bc79468950e518cde8448",
+  "label_map_hash": "21ebea1f58b8f555e77b54feb8154b2c367c8d1d553e3b8fb46e17fe03f4b275"
+}

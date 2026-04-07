@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block title %}Samvak - Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-container">
+  <header class="page-header" style="margin-bottom: 3rem;">
+    <div class="page-header-left">
+      <div>
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Dashboard</h1>
+        <p style="color: #94a3b8;">Welcome back, <strong>{{ current_user.username }}</strong>. Here's your progress.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="stats-overview"
+    style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1.5rem; margin-bottom: 3rem;">
+    <div class="stat-card-glass">
+      <h3>Level</h3>
+      <p id="stat-level" class="stat-value">...</p>
+      <div class="stat-icon"><i class="fas fa-star"></i></div>
+    </div>
+    <div class="stat-card-glass">
+      <h3>XP Points</h3>
+      <p id="stat-xp" class="stat-value">...</p>
+      <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+    </div>
+    <div class="stat-card-glass">
+      <h3>Words Learned</h3>
+      <p id="stat-words" class="stat-value">...</p>
+      <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+    </div>
+  </div>
+
+  <style>
+    .stat-card-glass {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card-glass:hover {
+      transform: translateY(-5px);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .stat-card-glass h3 {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin: 0 0 0.5rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 0;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-icon {
+      position: absolute;
+      bottom: -10px;
+      right: 10px;
+      font-size: 5rem;
+      opacity: 0.08;
+      transform: rotate(-10deg);
+    }
+  </style>
+
+  <div class="history-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="font-size: 1.5rem; color: #f1f5f9;">Recent Activity</h2>
+      <span style="font-size: 0.9rem; color: #64748b;">Last 10 items</span>
+    </div>
+
+    <div class="history-container-glass">
+      <div id="loading" style="text-align:center; padding: 3rem; color: #94a3b8;">
+        <div class="loader-spinner"></div>
+        <p style="margin-top:1rem">Loading history...</p>
+      </div>
+      <div id="history-grid" class="history-grid"></div>
+    </div>
+  </div>
+
+  <style>
+    .history-container-glass {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 1.5rem;
+      min-height: 200px;
+    }
+
+    .history-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .history-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .history-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: scale(1.01);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .h-left h3 {
+      width: 100%;
+      font-size: 1.02rem;
+      color: #e2e8f0;
+      margin: 0 0 0.4rem 0;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .h-left p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .h-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+
+    .h-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-sign {
+      background: rgba(34, 197, 94, 0.1);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .badge-speech {
+      background: rgba(59, 130, 246, 0.1);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .h-time {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .loader-spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .stats-overview {
+        grid-template-columns: 1fr;
+      }
+
+      .history-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .h-right {
+        align-items: flex-start;
+        text-align: left;
+      }
+    }
+  </style>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const list = document.getElementById('history-grid');
+    const loader = document.getElementById('loading');
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function shorten(text, maxLen = 110) {
+      const clean = String(text || '').trim();
+      if (!clean) return '-';
+      if (clean.length <= maxLen) return clean;
+      return `${clean.slice(0, maxLen - 1)}...`;
+    }
+
+    function normalizeSource(source) {
+      const value = String(source || '').toLowerCase();
+      if (value.includes('speech')) return 'Speech-to-Sign';
+      if (value.includes('sign')) return 'Sign-to-Text';
+      return 'Translation';
+    }
+
+    function formatRelative(dateObj) {
+      if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return '';
+      const diffSeconds = Math.floor((Date.now() - dateObj.getTime()) / 1000);
+      if (diffSeconds < 60) return 'just now';
+      const diffMinutes = Math.floor(diffSeconds / 60);
+      if (diffMinutes < 60) return `${diffMinutes}m ago`;
+      const diffHours = Math.floor(diffMinutes / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      if (diffDays < 7) return `${diffDays}d ago`;
+      const diffWeeks = Math.floor(diffDays / 7);
+      if (diffWeeks < 5) return `${diffWeeks}w ago`;
+      const diffMonths = Math.floor(diffDays / 30);
+      if (diffMonths < 12) return `${diffMonths}mo ago`;
+      return `${Math.floor(diffDays / 365)}y ago`;
+    }
+
+    try {
+      const resHistory = await fetch('/api/history?limit=10', { cache: 'no-store' });
+      if (!resHistory.ok) {
+        throw new Error(`Unable to load history (${resHistory.status})`);
+      }
+      const dataHistory = await resHistory.json();
+
+      loader.style.display = 'none';
+
+      if (!dataHistory.length) {
+        list.innerHTML = '<div style="text-align:center; padding:1rem; color:#94a3b8;">No history found yet.</div>';
+      } else {
+        list.innerHTML = dataHistory.map((item) => {
+          const source = normalizeSource(item.source_type);
+          const isSign = source === 'Sign-to-Text';
+          const badgeClass = isSign ? 'badge-sign' : 'badge-speech';
+          const badgeIcon = isSign ? 'fa-hands' : 'fa-microphone';
+          const inputText = shorten(item.input_text || (isSign ? 'Video Input' : 'Speech Input'));
+          const outputText = shorten(item.output_text || '-');
+          const summary = `${inputText} -> ${outputText}`;
+          const dateObj = new Date(item.timestamp);
+          const absoluteTime = Number.isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleString();
+          const relativeTime = formatRelative(dateObj);
+
+          return `
+            <div class="history-card">
+              <div class="h-left">
+                <h3>${escapeHtml(summary)}</h3>
+                <p>${escapeHtml(source)} activity</p>
+              </div>
+              <div class="h-right">
+                <span class="h-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${escapeHtml(source)}</span>
+                <span class="h-time" title="${escapeHtml(absoluteTime)}">${escapeHtml(relativeTime || absoluteTime)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const resStats = await fetch('/api/dashboard-stats', { cache: 'no-store' });
+      if (!resStats.ok) {
+        throw new Error(`Unable to load stats (${resStats.status})`);
+      }
+
+      const stats = await resStats.json();
+      const levelEl = document.getElementById('stat-level');
+      const xpEl = document.getElementById('stat-xp');
+      const wordsEl = document.getElementById('stat-words');
+
+      if (levelEl) levelEl.innerText = stats.level;
+      if (xpEl) xpEl.innerText = stats.xp;
+      if (wordsEl) wordsEl.innerText = stats.words_learned;
+
+    } catch (err) {
+      console.error(err);
+      loader.innerHTML = '<p style="color:#fca5a5">Failed to load dashboard data. Please refresh or sign in again.</p>';
+    }
+  });
+</script>
+{% endblock %}
+
+{% block footer %}{% endblock %}

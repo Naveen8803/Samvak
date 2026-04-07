@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}Samvak - Where Signs Speak{% endblock %}
+{% block content %}
+<!-- HOME (HERO) -->
+<section id="home-view" class="page-view active">
+  <!-- HERO CONTENT AS IS -->
+  <div class="hero-new">
+    <div class="hero-bg-blob blob-1"></div>
+    <div class="hero-bg-blob blob-2"></div>
+    <div class="hero-bg-blob blob-3"></div>
+
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-badge-new">
+          <span class="badge-dot"></span>
+          <span class="badge-text">Samvak</span>
+        </div>
+
+        <h1 class="hero-heading-new">
+          Samvak
+          <span class="gradient-text">Where Signs Speak</span>
+        </h1>
+
+        <p class="hero-subtitle-new">
+          Real-time multilingual translation between sign language and speech.
+          Bringing deaf and hearing communities closer with cutting-edge AI.
+        </p>
+
+        <div class="hero-features">
+          <div class="feature-item">
+            <div class="feature-icon">🤟</div>
+            <div>
+              <h4>Live Sign Recognition</h4>
+              <p>Real-time ISL to text conversion</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🎙️</div>
+            <div>
+              <h4>Speech to Sign</h4>
+              <p>Voice input to animated signs</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🌍</div>
+            <div>
+              <h4>10 Languages</h4>
+              <p>Support for Indian &amp; international</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-ctas-new">
+          <a href="{{ url_for('sign_to_text') }}" class="btn-primary-new"
+            style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+            <span>Start Live Translation</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="margin-left: 0.5rem;">
+              <path d="M3 10L17 10M17 10L12 5M17 10L12 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </a>
+          <a href="{{ url_for('learn') }}" class="btn-secondary-new"
+            style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+            Learn Signs
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <h3>500+</h3>
+            <p>Signs Supported</p>
+          </div>
+          <div class="stat">
+            <h3>10</h3>
+            <p>Languages</p>
+          </div>
+          <div class="stat">
+            <h3>&lt;180ms</h3>
+            <p>Latency</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-showcase">
+          <div class="showcase-card">
+            <div class="showcase-header">
+              <span class="status-badge">
+                <span class="pulse-dot"></span>
+                live LIVE
+              </span>
+            </div>
+            <div class="showcase-body">
+              <div class="showcase-row">
+                <span class="label">Input</span>
+                <span class="value">ISL HELLO</span>
+              </div>
+              <div class="showcase-row">
+                <span class="label">Detected</span>
+                <span class="value confidence">Confidence 95%</span>
+              </div>
+              <div class="showcase-divider"></div>
+              <div class="showcase-row">
+                <span class="label">English</span>
+                <span class="value primary">Hello there</span>
+              </div>
+              <div class="showcase-row">
+                <span class="label">Hindi</span>
+                <span class="value secondary">नमस्ते</span>
+              </div>
+            </div>
+            <div class="showcase-footer">
+              <div class="pulse-dot"></div>
+              <span>Real-time translation</span>
+            </div>
+          </div>
+
+          <div class="float-card card-1">
+            <div class="card-icon">♿</div>
+            <p>Accessibility</p>
+          </div>
+          <div class="float-card card-2">
+            <div class="card-icon">⚡</div>
+            <p>Instant</p>
+          </div>
+          <div class="float-card card-3">
+            <div class="card-icon">🔒</div>
+            <p>Private</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS SECTION -->
+<section class="page-view active" style="background: #020617; padding: 6rem 0;">
+  <div class="page-container">
+    <div style="text-align: center; margin-bottom: 4rem;">
+      <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">How It Works</h2>
+      <p style="color: #94a3b8; font-size: 1.1rem;">Seamless communication in three simple steps</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-visual">📹</div>
+        <h3>Capture</h3>
+        <p>Our AI camera tracks hand movements and facial expressions in real-time with high precision.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-visual">🧠</div>
+        <h3>Process</h3>
+        <p>Deep learning models analyze gestures and context to understand the intended meaning instantly.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-visual">🗣️</div>
+        <h3>Translate</h3>
+        <p>The system converts signs to spoken speech output, or spoken words into sign animations.</p>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 4rem;">
+      <a href="{{ url_for('auth.register') }}" class="btn-primary-new" style="text-decoration: none;">Get Started
+        Now</a>
+    </div>
+  </div>
+
+  <style>
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .step-card {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s;
+    }
+
+    .step-card:hover {
+      transform: translateY(-10px);
+      background: rgba(30, 41, 59, 0.6);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .step-number {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      background: #6366f1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
+    }
+
+    .step-visual {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-card h3 {
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .step-card p {
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+  </style>
+</section>
+{% endblock %}
+{% block footer %}{% endblock %}
+

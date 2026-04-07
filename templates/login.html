@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Samvak{% endblock %}
+{% block auth_fab %}{% endblock %}
+{% block bottom_nav %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="page-container" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+  <div class="auth-card-glass">
+    <div class="auth-header">
+      <h2
+        style="font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        Welcome Back</h2>
+      <p style="color: #94a3b8;">Sign in to continue your journey</p>
+    </div>
+
+    <form action="{{ url_for('auth.login') }}" method="POST"
+      style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="form-group">
+        <label for="email" style="color: #e2e8f0; margin-bottom: 0.5rem; display: block; font-size: 0.9rem;">Email
+          Address</label>
+        <input type="email" name="email" id="email" class="glass-input" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password"
+          style="color: #e2e8f0; margin-bottom: 0.5rem; display: block; font-size: 0.9rem;">Password</label>
+        <input type="password" name="password" id="password" class="glass-input" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn-primary-new" style="justify-content: center; margin-top: 1rem; width: 100%;">
+        Sign In
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .auth-card-glass {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .auth-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .glass-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  }
+
+  .auth-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #94a3b8;
+  }
+
+  .auth-footer a {
+    color: #818cf8;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .auth-footer a:hover {
+    color: #a5b4fc;
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}

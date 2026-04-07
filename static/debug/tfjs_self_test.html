@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Samvak TFJS Self-Test</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Consolas, "Courier New", monospace;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 12px;
+    }
+
+    p {
+      margin: 0 0 16px;
+      color: #94a3b8;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 280px;
+    }
+  </style>
+  <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script defer src="/static/js/tfjs_self_test.js"></script>
+  <script defer>
+    window.addEventListener("DOMContentLoaded", async () => {
+      const output = document.getElementById("output");
+      const params = new URLSearchParams(window.location.search);
+      const modelUrl = params.get("model") || "/static/models/tfjs_lstm/model.json";
+      const stopOnSuccess = params.get("stopOnSuccess") !== "0";
+      const requestedBackends = (params.get("backends") || "webgl,cpu")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+      try {
+        const result = await window.SamvakTfjsSelfTest.runSelfTest({
+          modelUrl,
+          backends: requestedBackends,
+          stopOnSuccess,
+        });
+        output.textContent = JSON.stringify(result, null, 2);
+      } catch (error) {
+        output.textContent = JSON.stringify({
+          ok: false,
+          error: error && error.message ? error.message : String(error),
+          modelUrl,
+        }, null, 2);
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>Samvak TFJS Self-Test</h1>
+  <p>Use <code>?model=/static/models/tfjs_lstm/model.json</code> to pick the bundle under test.</p>
+  <pre id="output">Running self-test...</pre>
+</body>
+</html>
