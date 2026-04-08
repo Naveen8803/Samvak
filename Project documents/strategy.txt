@@ -1,0 +1,20 @@
+import os
+from docx import Document
+from docx.shared import Pt, Inches, Cm
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from copy import deepcopy
+
+front_doc = Document(r'E:\sam\Project documents\Samvak_FrontPages.docx')
+v4_doc = Document(r'E:\sam\Project documents\Samvak_ProjectReview_Final_V4.docx')
+
+# We want to clear V4's front pages or just copy the elements we need from V4 to front_doc.
+# However, `python-docx` doesn't support deep copy of paragraph styles seamlessly for complex docs.
+# Alternative: Since we only want the FIRST 4 PAGES of the reference (up to Acknowledgement),
+# we can just use `Samvak_FrontPages.docx` as the base, add a page break, and then regenerate Chapters 1-9 using Python!
+
+# WAIT, I already wrote `build_v5.py` and it has functions `add_para`! 
+# We can just write a script that OPENS `Samvak_FrontPages.docx` instead of creating an empty `Document()`, 
+# and then generates Abstract and Chapters 1-9 directly into it!
+
+# Let's write `generate_review_doc_v6.py` that relies on Samvak_FrontPages.docx as the template.

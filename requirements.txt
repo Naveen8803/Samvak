@@ -8,6 +8,7 @@ flask-login
 flask-sqlalchemy
 flask-socketio
 python-socketio
+gunicorn                  # production WSGI server (Procfile)
 eventlet                  # async driver for flask-socketio real-time streaming
 
 # ── Auth / security ────────────────────────────────────────────────────────
