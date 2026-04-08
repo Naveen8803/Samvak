@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+
+{% block title %}Samvak - Feedback{% endblock %}
+
+{% block content %}
+<section id="feedback-view" class="page-view active">
+  <div class="page-container" style="max-width: 800px;">
+    <header class="page-header" style="text-align: center; margin-bottom: 3rem;">
+      <h1 class="hero-heading-new" style="font-size: 2.5rem; justify-content: center;">
+        Share Your <span class="gradient-text">Feedback</span>
+      </h1>
+      <p style="color: #9ca3af; font-size: 1.1rem; margin-top: 1rem;">
+        Help us improve Samvak — your experience matters to us!
+      </p>
+    </header>
+
+    <div class="feedback-card-glass">
+      <form id="feedback-form" onsubmit="handleFeedback(event)">
+        <!-- Name & Email row -->
+        <div class="feedback-row">
+          <div class="form-group" style="flex: 1;">
+            <label for="fb-name">Name</label>
+            <input type="text" id="fb-name" placeholder="Your name" required class="glass-input">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="fb-email">Email</label>
+            <input type="email" id="fb-email" placeholder="your@email.com" required class="glass-input">
+          </div>
+        </div>
+
+        <!-- Star Rating -->
+        <div class="form-group">
+          <label>How would you rate your experience?</label>
+          <div class="star-rating" id="star-rating">
+            <button type="button" class="star-btn" data-value="1" aria-label="1 star">
+              <i class="fas fa-star"></i>
+            </button>
+            <button type="button" class="star-btn" data-value="2" aria-label="2 stars">
+              <i class="fas fa-star"></i>
+            </button>
+            <button type="button" class="star-btn" data-value="3" aria-label="3 stars">
+              <i class="fas fa-star"></i>
+            </button>
+            <button type="button" class="star-btn" data-value="4" aria-label="4 stars">
+              <i class="fas fa-star"></i>
+            </button>
+            <button type="button" class="star-btn" data-value="5" aria-label="5 stars">
+              <i class="fas fa-star"></i>
+            </button>
+            <span class="rating-label" id="rating-label">Select a rating</span>
+          </div>
+          <input type="hidden" id="fb-rating" value="0">
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+          <label for="fb-category">What is this feedback about?</label>
+          <select id="fb-category" class="glass-input glass-select">
+            <option value="general">General Experience</option>
+            <option value="sign-to-text">Sign to Text</option>
+            <option value="speech-to-sign">Speech to Sign</option>
+            <option value="learn">Learn Signs</option>
+            <option value="ui">User Interface / Design</option>
+            <option value="performance">Performance / Speed</option>
+            <option value="bug">Bug Report</option>
+            <option value="feature">Feature Request</option>
+          </select>
+        </div>
+
+        <!-- Message -->
+        <div class="form-group">
+          <label for="fb-message">Your Feedback</label>
+          <textarea id="fb-message" rows="5" placeholder="Tell us what you think, what could be better, or report an issue..." required class="glass-input"></textarea>
+        </div>
+
+        <button type="submit" id="fbSendBtn" class="btn-primary-new" style="width: 100%; justify-content: center;">
+          <i class="fas fa-paper-plane"></i>
+          <span>Submit Feedback</span>
+        </button>
+
+        <div id="fb-msg"
+          style="display:none; margin-top: 1rem; padding: 1rem; border-radius: 12px; text-align: center; transition: all 0.3s ease;">
+        </div>
+      </form>
+    </div>
+
+    <!-- Quick feedback cards -->
+    <div class="feedback-quick-section">
+      <h3 style="text-align: center; margin-bottom: 1.5rem; color: #e2e8f0; font-size: 1.2rem;">
+        <i class="fas fa-lightbulb" style="color: #fbbf24; margin-right: 0.5rem;"></i>
+        Quick Feedback
+      </h3>
+      <div class="quick-feedback-grid">
+        <button class="quick-chip" data-msg="Loving the sign detection accuracy!" onclick="quickFill(this)">
+          <i class="fas fa-thumbs-up"></i> Great accuracy
+        </button>
+        <button class="quick-chip" data-msg="The speech to sign avatar is really impressive!" onclick="quickFill(this)">
+          <i class="fas fa-robot"></i> Love the avatar
+        </button>
+        <button class="quick-chip" data-msg="The UI is beautiful and easy to use." onclick="quickFill(this)">
+          <i class="fas fa-palette"></i> Beautiful UI
+        </button>
+        <button class="quick-chip" data-msg="Would love to see more sign language vocabulary added." onclick="quickFill(this)">
+          <i class="fas fa-plus-circle"></i> More signs please
+        </button>
+        <button class="quick-chip" data-msg="Experiencing some latency during live translation." onclick="quickFill(this)">
+          <i class="fas fa-tachometer-alt"></i> Improve speed
+        </button>
+        <button class="quick-chip" data-msg="Would be great to have offline mode support." onclick="quickFill(this)">
+          <i class="fas fa-wifi-slash"></i> Offline mode
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .feedback-card-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .feedback-row {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #e5e7eb;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  /* Star Rating */
+  .star-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.3rem;
+  }
+
+  .star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.8rem;
+    color: #374151;
+    transition: all 0.2s ease;
+    padding: 0.2rem;
+    line-height: 1;
+  }
+
+  .star-btn:hover,
+  .star-btn.hovered {
+    color: #fbbf24;
+    transform: scale(1.15);
+  }
+
+  .star-btn.active {
+    color: #fbbf24;
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+  }
+
+  .rating-label {
+    margin-left: 0.8rem;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+
+  /* Select */
+  .glass-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  .glass-select option {
+    background: #1e293b;
+    color: #e5e7eb;
+  }
+
+  /* Quick Feedback */
+  .feedback-quick-section {
+    margin-top: 3rem;
+  }
+
+  .quick-feedback-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  .quick-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 999px;
+    color: #a5b4fc;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .quick-chip:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  }
+
+  .quick-chip:active {
+    transform: scale(0.97);
+  }
+
+  @media (max-width: 600px) {
+    .feedback-row {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .feedback-card-glass {
+      padding: 1.5rem;
+    }
+
+    .star-btn {
+      font-size: 1.5rem;
+    }
+
+    .rating-label {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Star rating interaction
+  (function () {
+    const stars = document.querySelectorAll('.star-btn');
+    const ratingInput = document.getElementById('fb-rating');
+    const ratingLabel = document.getElementById('rating-label');
+    const labels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent!'];
+
+    stars.forEach((star) => {
+      star.addEventListener('click', () => {
+        const val = parseInt(star.dataset.value);
+        ratingInput.value = val;
+        ratingLabel.textContent = labels[val];
+        stars.forEach((s) => {
+          s.classList.toggle('active', parseInt(s.dataset.value) <= val);
+        });
+      });
+
+      star.addEventListener('mouseenter', () => {
+        const val = parseInt(star.dataset.value);
+        stars.forEach((s) => {
+          s.classList.toggle('hovered', parseInt(s.dataset.value) <= val);
+        });
+      });
+
+      star.addEventListener('mouseleave', () => {
+        stars.forEach((s) => s.classList.remove('hovered'));
+      });
+    });
+  })();
+
+  function quickFill(btn) {
+    const msg = btn.dataset.msg;
+    document.getElementById('fb-message').value = msg;
+    document.getElementById('fb-message').focus();
+    // Scroll to form
+    document.querySelector('.feedback-card-glass').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function handleFeedback(e) {
+    e.preventDefault();
+    const btn = document.getElementById('fbSendBtn');
+    const msgDiv = document.getElementById('fb-msg');
+    const form = e.target;
+
+    const name = document.getElementById('fb-name').value.trim();
+    const email = document.getElementById('fb-email').value.trim();
+    const rating = parseInt(document.getElementById('fb-rating').value);
+    const category = document.getElementById('fb-category').value;
+    const message = document.getElementById('fb-message').value.trim();
+
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    btn.disabled = true;
+    msgDiv.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, rating, category, message }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        msgDiv.style.background = 'rgba(34, 197, 94, 0.1)';
+        msgDiv.style.border = '1px solid #22c55e';
+        msgDiv.style.color = '#4ade80';
+        msgDiv.innerText = data.message || 'Thank you for your feedback!';
+        msgDiv.style.display = 'block';
+        form.reset();
+        // Reset stars
+        document.querySelectorAll('.star-btn').forEach(s => s.classList.remove('active'));
+        document.getElementById('rating-label').textContent = 'Select a rating';
+        document.getElementById('fb-rating').value = '0';
+        setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
+      } else {
+        const errText = (data.errors || ['Something went wrong.']).join(' ');
+        msgDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+        msgDiv.style.border = '1px solid #ef4444';
+        msgDiv.style.color = '#fca5a5';
+        msgDiv.innerText = errText;
+        msgDiv.style.display = 'block';
+        setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
+      }
+    } catch (err) {
+      msgDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+      msgDiv.style.border = '1px solid #ef4444';
+      msgDiv.style.color = '#fca5a5';
+      msgDiv.innerText = 'Network error. Please try again.';
+      msgDiv.style.display = 'block';
+      setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
+    } finally {
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Submit Feedback</span>';
+      btn.disabled = false;
+    }
+  }
+</script>
+{% endblock %}
+{% block footer %}{% endblock %}

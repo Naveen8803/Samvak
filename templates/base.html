@@ -54,6 +54,7 @@
             <div class="footer-col">
                 <h4>Company</h4>
                 <a href="{{ url_for('contact') }}">Contact Us</a>
+                <a href="{{ url_for('feedback') }}">Feedback</a>
                 <a href="#">Privacy Policy</a>
                 <a href="#">Terms of Service</a>
             </div>
@@ -126,7 +127,7 @@
     </style>
     {% endblock %}
 
-    {# Flash Messages (Toast logic usually goes here or in app.js, ensuring they are rendered) #}
+    {# Flash Messages #}
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     <div id="flash-container"

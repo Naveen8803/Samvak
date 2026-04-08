@@ -7,7 +7,7 @@ from sign import sign_bp
 from auth import auth_bp
 from dictionary import dictionary_bp
 from config import Config
-from models import User, Translation, UserPreference, ContactMessage, normalize_preference_payload
+from models import User, Translation, UserPreference, ContactMessage, Feedback, normalize_preference_payload
 from extensions import db, socketio
 from sqlalchemy import func, text, event, or_
 from sqlalchemy.engine import Engine
@@ -144,6 +144,10 @@ def speech_to_sign():
 def contact():
     return render_template("contact.html")
 
+@app.route("/feedback")
+def feedback():
+    return render_template("feedback.html")
+
 @app.route("/learn")
 def learn():
     return render_template("learn.html")
@@ -185,6 +189,43 @@ def contact_api():
         db.session.rollback()
         print(f"WARN: Contact form save failed: {exc}")
         return jsonify({"success": False, "errors": ["Could not save your message right now. Please try again."]}), 500
+
+
+@app.route("/api/feedback", methods=["POST"])
+def feedback_api():
+    import re
+    data = request.get_json(silent=True) or {}
+    name = str(data.get("name") or "").strip()
+    email = str(data.get("email") or "").strip()
+    message = str(data.get("message") or "").strip()
+    category = str(data.get("category") or "general").strip()
+
+    try:
+        rating = int(data.get("rating") or 0)
+    except (TypeError, ValueError):
+        rating = 0
+
+    errors = []
+    if not name:
+        errors.append("Name is required.")
+    if not email or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        errors.append("A valid email is required.")
+    if rating < 1 or rating > 5:
+        errors.append("Please select a rating (1-5 stars).")
+    if not message:
+        errors.append("Feedback message is required.")
+    if errors:
+        return jsonify({"success": False, "errors": errors}), 400
+
+    try:
+        entry = Feedback(name=name, email=email, rating=rating, category=category, message=message)
+        db.session.add(entry)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Thank you for your feedback! We really appreciate it."})
+    except Exception as exc:
+        db.session.rollback()
+        print(f"WARN: Feedback save failed: {exc}")
+        return jsonify({"success": False, "errors": ["Could not save your feedback right now. Please try again."]}), 500
 
 
 @app.after_request

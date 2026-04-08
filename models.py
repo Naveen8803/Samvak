@@ -213,3 +213,26 @@ class ContactMessage(db.Model):
             "message": self.message,
             "timestamp": self.timestamp.isoformat(),
         }
+
+
+class Feedback(db.Model):
+    __tablename__ = "feedback"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(200), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)          # 1-5 stars
+    category = db.Column(db.String(50), nullable=False)     # e.g. general, sign-to-text, speech, ui
+    message = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "rating": self.rating,
+            "category": self.category,
+            "message": self.message,
+            "timestamp": self.timestamp.isoformat(),
+        }
