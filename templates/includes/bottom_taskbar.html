@@ -25,9 +25,9 @@
         <span class="taskbar-label">Learn</span>
     </a>
 
-    <a href="{{ url_for('contact') }}"
-        class="taskbar-nav-link{% if request.path == url_for('contact') %} active{% endif %}">
-        <i class="fas fa-envelope taskbar-icon"></i>
-        <span class="taskbar-label">Contact</span>
+    <a href="{{ url_for('feedback') }}"
+        class="taskbar-nav-link{% if request.path == url_for('feedback') %} active{% endif %}">
+        <i class="fas fa-comment-dots taskbar-icon"></i>
+        <span class="taskbar-label">Feedback</span>
     </a>
 </div>

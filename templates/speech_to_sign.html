@@ -424,6 +424,18 @@
     .sts-rail { position: static; }
     .sts-bottom-grid { grid-template-columns: 1fr; }
     #hand-avatar-canvas { height: 280px; }
+
+    /* Stack the text translate input + button vertically */
+    .sts-text-translate-row {
+      flex-direction: column !important;
+    }
+    .sts-text-translate-row input {
+      width: 100% !important;
+    }
+    .sts-text-translate-row button {
+      width: 100% !important;
+      justify-content: center;
+    }
   }
 </style>
 {% endblock %}
@@ -500,7 +512,7 @@
       <!-- Text input -->
       <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid rgba(148,163,184,0.1);">
         <label for="textTranslateInput" style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.5rem; display:block;">Or type text</label>
-        <div style="display:flex; gap:0.5rem;">
+        <div class="sts-text-translate-row" style="display:flex; gap:0.5rem;">
           <input type="text" id="textTranslateInput" placeholder="Type something to translate..."
             style="flex:1; background:rgba(2,6,23,0.5); border:1px solid rgba(148,163,184,0.14); border-radius:10px; padding:0.65rem 0.85rem; color:#e2e8f0; font-size:0.82rem; outline:none;"
             onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='rgba(148,163,184,0.14)'" />
